@@ -1,0 +1,3 @@
+﻿  TaxiBookingSystem.cpp
+C:\Users\Owner\Documents\Software_Projects\TaxiBooking(demo)\TaxiBookingSystem\TaxiBookingSystem.cpp(151,45): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+  TaxiBookingSystem.vcxproj -> C:\Users\Owner\Documents\Software_Projects\TaxiBooking(demo)\TaxiBookingSystem\x64\Debug\TaxiBookingSystem.exe
