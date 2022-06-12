@@ -5,10 +5,7 @@
 #include <sstream>
 using namespace std;
 
-enum Authorization{customer, driver, admin}; //compiler doesn't like enum? will fix this but runs fine for now
-
 struct Customer {
-    int id;
     string email;
     string firstName;
     string lastName;
@@ -16,8 +13,7 @@ struct Customer {
     string password;
 
     //constructor
-    Customer(int i = 1, string e = "temp@email.com", string f = "firstName", string l = "lastName", string ph = "phoneNumber", string pa = "password") {
-        id = i;
+    Customer(string e = "temp@email.com", string f = "firstName", string l = "lastName", string ph = "phoneNumber", string pa = "password") {
         email = e;
         firstName = f;
         lastName = l;
@@ -27,7 +23,6 @@ struct Customer {
 };
 
 struct Driver {
-    int id;
     string email;
     string firstName;
     string lastName;
@@ -37,8 +32,7 @@ struct Driver {
     string registration; //rego license plate number of taxi
 
     //constructor
-    Driver(int i = 1, string e = "temp@email.com", string f = "firstName", string l = "lastName", string ph = "phoneNumber", string pa = "password", string li = "licenceNum", string re = "registrationNum") {
-        id = i;
+    Driver(string e = "temp@email.com", string f = "firstName", string l = "lastName", string ph = "phoneNumber", string pa = "password", string li = "licenceNum", string re = "registrationNum") {
         email = e;
         firstName = f;
         lastName = l;
@@ -50,7 +44,6 @@ struct Driver {
 };
 
 struct Admin {
-    int id;
     string email;
     string firstName;
     string lastName;
@@ -58,8 +51,7 @@ struct Admin {
     string password;
 
     //constructor
-    Admin(int i = 1, string e = "temp@email.com", string f = "firstName", string l = "lastName", string ph = "phoneNumber", string pa = "password") {
-        id = i;
+    Admin(string e = "temp@email.com", string f = "firstName", string l = "lastName", string ph = "phoneNumber", string pa = "password") {
         email = e;
         firstName = f;
         lastName = l;
@@ -80,6 +72,9 @@ void displayAllAdmin(vector<Admin>adminList);
 void updateCustomersFile(vector<Customer> customers);
 string createAndCheckPassword();
 void pageBreak();
+
+
+
 
 int main() //start menu
 {
@@ -148,7 +143,6 @@ void registerNewLogin() {
     }
 
     //get new customer details
-    newCustomer.id = customerList.size() + 1;
     newCustomer.email = unverifiedEmail;
     cout << "Enter first name: ";
     getline(cin, newCustomer.firstName);
@@ -180,9 +174,9 @@ void login() {
     pageBreak();
     cout << "Login" << endl;
     cout << "*****" << endl;
-    Authorization userAuthority{customer};
+    string userAuthority = "customer";
     //promt for username and password then look through customerList, driversList and adminList
-    bool foundUsernamePasswordMatch{ false };
+    bool foundUsernamePasswordMatch = false;
     while (foundUsernamePasswordMatch != true) {
         cout << "\nEnter username (email): ";
         getline(cin, inputUsername);
@@ -191,21 +185,21 @@ void login() {
         //look in customer list
         for (int i = 0; i < customerList.size(); i++) {
             if (inputUsername == customerList[i].email && inputPassword == customerList[i].password) {
-                userAuthority = customer;
+                userAuthority = "customer";
                 foundUsernamePasswordMatch = true;
             }
         }
         //look in driver list
         for (int i = 0; i < driversList.size(); i++) {
             if (inputUsername == driversList[i].email && inputPassword == driversList[i].password) {
-                userAuthority = driver;
+                userAuthority = "driver";
                 foundUsernamePasswordMatch = true;
             }
         }
         //look in admin list
         for (int i = 0; i < adminList.size(); i++) {
             if (inputUsername == adminList[i].email && inputPassword == adminList[i].password) {
-                userAuthority = admin;
+                userAuthority = "admin";
                 foundUsernamePasswordMatch = true;
             }
         }
@@ -215,22 +209,18 @@ void login() {
 
     cout << "correct name and password" << endl;
 
-    switch (userAuthority)
-    {
-    case customer:
+    if (userAuthority == "customer") {
         cout << "You are a customer" << endl;
         //customerMenu(userName); 
-        break;
-    case driver:
+    }
+    else if (userAuthority == "driver") {
         cout << "You are a driver" << endl;
         //driverMenu(userName);
-        break;
-    case admin:
+    }
+    else if (userAuthority == "admin") {
         cout << "You are admin" << endl;
         //adminMenu(userName);
-        break;
-    default:
-        break;
+
     }
 }
 
@@ -245,10 +235,6 @@ vector<Customer> readCustomerFile() {
         string cell;
         while (getline(customersFile, line)) {
             istringstream linestream(line);
-
-            getline(linestream, cell, ',');
-            stringstream ssId(cell);
-            ssId >> tempCustomer.id;
 
             getline(linestream, cell, ',');
             tempCustomer.email = cell;
@@ -282,10 +268,6 @@ vector<Driver> readDriversFile() {
         string cell;
         while (getline(driversFile, line)) {
             istringstream linestream(line);
-
-            getline(linestream, cell, ',');
-            stringstream ssId(cell);
-            ssId >> tempDriver.id;
 
             getline(linestream, cell, ',');
             tempDriver.email = cell;
@@ -328,10 +310,6 @@ vector<Admin> readAdminsFile() {
             istringstream linestream(line);
 
             getline(linestream, cell, ',');
-            stringstream ssId(cell);
-            ssId >> tempAdmin.id;
-
-            getline(linestream, cell, ',');
             tempAdmin.email = cell;
 
             getline(linestream, cell, ',');
@@ -355,7 +333,6 @@ vector<Admin> readAdminsFile() {
 void displayAllCostomers(vector<Customer>customerList) {
     //displays all customers and their details from a vector
     for (auto c : customerList) {
-        cout << "Customer id: " << c.id << endl;
         cout << "Email: " << c.email << endl;
         cout << "Name: " << c.firstName << " " << c.lastName << endl;
         cout << "Ph number: " << c.phoneNumber << endl;
@@ -366,7 +343,6 @@ void displayAllCostomers(vector<Customer>customerList) {
 void displayAllDrivers(vector<Driver>driversList) {
     //displays all customers and their details from a vector
     for (auto d : driversList) {
-        cout << "Customer id: " << d.id << endl;
         cout << "Email: " << d.email << endl;
         cout << "Name: " << d.firstName << " " << d.lastName << endl;
         cout << "Ph number: " << d.phoneNumber << endl;
@@ -379,7 +355,6 @@ void displayAllDrivers(vector<Driver>driversList) {
 void displayAllAdmin(vector<Admin>adminList) {
     //displays all admin and their details from a vector
     for (auto a : adminList) {
-        cout << "Customer id: " << a.id << endl;
         cout << "Email: " << a.email << endl;
         cout << "Name: " << a.firstName << " " << a.lastName << endl;
         cout << "Ph number: " << a.phoneNumber << endl;
@@ -392,7 +367,7 @@ void updateCustomersFile(vector<Customer> customers) {
     customersFile.open("customers.csv", ios::out);
     if (customersFile.is_open()) {
         for (int i = 0; i < customers.size(); i++) {
-            customersFile << customers[i].id << "," << customers[i].email << "," << customers[i].firstName << ","
+            customersFile << customers[i].email << "," << customers[i].firstName << ","
                 << customers[i].lastName << "," << customers[i].phoneNumber << "," << customers[i].password << endl;
         }
         customersFile.close();
