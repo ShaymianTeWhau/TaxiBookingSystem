@@ -24,9 +24,6 @@ At the end of the login() function there is a switch statement with functions i 
 They would go to different sub menus deppending on what kind of user you are. 
 We could pass in their name maybe?
 
-There is 1 warning at the moment because I used an Enum, VS doesnt like it,
-so i'll figure out how to replace that at some stage but it works fine.
-
 readCustomersFile(), readDriversFile(), readAdminsFile() are all functions that read .csv files and return a vector.
 However I couldn't figure out how to condense these to one function. 
 
