@@ -60,6 +60,32 @@ struct Admin {
     }
 };
 
+//struct Booking
+
+struct lostProperty {
+    string description;
+    Driver submittedBy;
+
+    //constructor
+    lostProperty(string d = "tempDescription") {
+        description = d;
+    }
+};
+
+struct lostPropertyClaim {
+    string description;
+    Customer reportedBy;
+
+    //constructor
+    lostPropertyClaim(string d = "tempDescription") {
+        description = d;
+    }
+};
+
+//struct Complaint
+
+//struct Enquiry
+
 //prototypes
 void registerNewLogin();
 void login();
