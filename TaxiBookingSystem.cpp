@@ -73,9 +73,6 @@ void updateCustomersFile(vector<Customer> customers);
 string createAndCheckPassword();
 void pageBreak();
 
-
-
-
 int main() //start menu
 {
     string userInput{};
@@ -91,13 +88,13 @@ int main() //start menu
 
         getline(cin, userInput);
 
-        if (userInput == "1") {
+        if (userInput == "1" || userInput == "r") {
             registerNewLogin();
         }
-        else if (userInput == "2") {
+        else if (userInput == "2" || userInput == "l") {
             login();
         }
-        else if (userInput == "3") {
+        else if (userInput == "3" || userInput == "e") {
             cout << "Bye for now" << endl;
             keepRunning = false;
         }
@@ -124,8 +121,11 @@ void registerNewLogin() {
 
     //promt user to enter email
     while(containsAddressSign == false) {
-        cout << "\nEnter email (This will be your username): ";
+        cout << "\nEnter email (This will be your username): " << endl;
+        cout << "(note: type 'e' to cancel and exit)" << endl;
         getline(cin, unverifiedEmail);
+
+        if (unverifiedEmail == "e") return; //if user types 'e' for exit, they will return to start menu
 
         //make sure email has '@' symbol and a '.' symbol 
         if (unverifiedEmail.find('@') != string::npos && unverifiedEmail.find('.') != string::npos) {
@@ -146,10 +146,15 @@ void registerNewLogin() {
     newCustomer.email = unverifiedEmail;
     cout << "Enter first name: ";
     getline(cin, newCustomer.firstName);
+    if (newCustomer.firstName == "e") return; //if user types 'e' for exit, they will return to start menu
+
     cout << "Enter last name: ";
     getline(cin, newCustomer.lastName);
+    if (newCustomer.lastName == "e") return; //if user types 'e' for exit, they will return to start menu
+
     cout << "Enter phone number: ";
     getline(cin, newCustomer.phoneNumber);
+    if (newCustomer.phoneNumber == "e") return; //if user types 'e' for exit, they will return to start menu
 
     //check password    
     
@@ -180,6 +185,9 @@ void login() {
     while (foundUsernamePasswordMatch != true) {
         cout << "\nEnter username (email): ";
         getline(cin, inputUsername);
+
+        if (inputUsername == "e") return; //if user types 'e' for exit, they will return to start menu
+
         cout << "Enter password: ";
         getline(cin, inputPassword);
         //look in customer list
@@ -204,7 +212,7 @@ void login() {
             }
         }
 
-        if(foundUsernamePasswordMatch != true) cout << "Incorrect username or password, try again" << endl;
+        if(foundUsernamePasswordMatch != true) cout << "Incorrect username or password, try again (or enter 'e' to exit)" << endl;
     }
 
     cout << "correct name and password" << endl;
