@@ -64,11 +64,12 @@ struct Admin {
 
 struct lostProperty {
     string description;
-    Driver submittedBy;
+    string submittedBy;
 
     //constructor
-    lostProperty(string d = "tempDescription") {
+    lostProperty(string d = "tempDescription", string s = "tempName") {
         description = d;
+        submittedBy = s;
     }
 };
 
@@ -98,6 +99,10 @@ void displayAllAdmin(vector<Admin>adminList);
 void updateCustomersFile(vector<Customer> customers);
 string createAndCheckPassword();
 void pageBreak();
+void submitLostProperty();
+vector<lostProperty> readLostPropertyFile();
+void updateLostPropertyFile(vector<lostProperty> lostPropertyList);
+void displayAllLostProperty();
 
 int main() //start menu
 {
@@ -428,3 +433,69 @@ void pageBreak() {
     cout << "\n-------------------------------------------\n" << endl;
 }
 
+void submitLostProperty(){
+    //this function promts user to add to the list of lost property and will update the lostProperty.csv
+    pageBreak();
+    vector<lostProperty> lostPropertyList = readLostPropertyFile();
+    lostProperty newLostProperty;
+
+    cout << "Submit lost property" << endl;
+    cout << "Enter item description: ";
+    getline(cin, newLostProperty.description);
+
+    cout << "Submitted by: ";
+    getline(cin, newLostProperty.submittedBy);
+    lostPropertyList.push_back(newLostProperty);
+
+    updateLostPropertyFile(lostPropertyList);
+
+}
+
+vector<lostProperty> readLostPropertyFile() {
+    //this function will read lostProperty.csv and return vector
+    vector<lostProperty> lostPropertyList;
+    fstream lostPropertyFile;
+    lostProperty tempLostProperty;
+    lostPropertyFile.open("lostProperty.csv", ios::in);
+    if (lostPropertyFile.is_open()) {
+        string line;
+        string cell;
+        while (getline(lostPropertyFile, line)) {
+            istringstream linestream(line);
+
+            getline(linestream, cell, ',');
+            tempLostProperty.description = cell;
+
+            getline(linestream, cell, ',');
+            tempLostProperty.submittedBy = cell;
+
+            lostPropertyList.push_back(tempLostProperty);
+        }
+        lostPropertyFile.close();
+    }
+    return lostPropertyList;
+}
+
+void updateLostPropertyFile(vector<lostProperty> lostPropertyList) {
+    //this function updates the lostProperty.csv with the latest information
+    fstream lostPropertyFile;
+    lostPropertyFile.open("lostProperty.csv", ios::out);
+    if (lostPropertyFile.is_open()) {
+        for (int i = 0; i < lostPropertyList.size(); i++) {
+            lostPropertyFile << lostPropertyList[i].description << "," << lostPropertyList[i].submittedBy << endl;
+        }
+        lostPropertyFile.close();
+    }
+}
+
+void displayAllLostProperty() {
+    pageBreak();
+    vector<lostProperty> lostPropertyList = readLostPropertyFile();
+
+    cout << "lost property" << endl;
+    for (auto l : lostPropertyList) {
+        cout << l.description << ", submitted by " << l.submittedBy << endl;
+    }
+}
+
+//void claimLostProperty
