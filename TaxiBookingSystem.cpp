@@ -3,6 +3,7 @@
 #include <vector> //
 #include <string>
 #include <sstream>
+#include <algorithm>
 using namespace std;
 
 struct Customer {
@@ -30,9 +31,11 @@ struct Driver {
     string password;
     string licence; //drivers license number
     string registration; //rego license plate number of taxi
+    float driverStart;
+    float driverFinish;
 
     //constructor
-    Driver(string e = "temp@email.com", string f = "firstName", string l = "lastName", string ph = "phoneNumber", string pa = "password", string li = "licenceNum", string re = "registrationNum") {
+    Driver(string e = "temp@email.com", string f = "firstName", string l = "lastName", string ph = "phoneNumber", string pa = "password", string li = "licenceNum", string re = "registrationNum", float dS = 0, float dF = 0) {
         email = e;
         firstName = f;
         lastName = l;
@@ -40,6 +43,8 @@ struct Driver {
         password = pa;
         licence = li;
         registration = re;
+        driverStart = dS;
+        driverFinish = dF;
     }
 };
 
@@ -61,6 +66,30 @@ struct Admin {
 };
 
 //struct Booking
+
+struct Booking {
+    string bookingRef;
+    Customer customer;
+    Driver driver;
+    string date;
+    string time;
+    int duration; //minutes
+    string startLocation;
+    string endLocation;
+    float cost;
+
+    //constructor
+    Booking(string b = "refTemp", string d = "tempDate", string t = "tempTime", int du = 0, string sL = "tempStartLocation", string eL = "tempEndLocation", float c = 0) {
+        bookingRef = b;
+        date = d;
+        time = t;
+        duration = du;
+        startLocation = sL;
+        endLocation = eL;
+        cost = c;
+    }
+
+};
 
 struct lostProperty {
     string description;
@@ -90,8 +119,8 @@ struct lostPropertyClaim {
 //prototypes
 void registerNewLogin();
 void login();
-vector<Customer> readCustomerFile();
-vector<Driver> readDriversFile();
+vector<Customer> readCustomerFile(); 
+vector<Driver> readDriversFile(); //update
 vector<Admin> readAdminsFile();
 void displayAllCostomers(vector<Customer>customerList);
 void displayAllDrivers(vector<Driver>driversList);
@@ -106,6 +135,26 @@ void updateLostPropertyFile(vector<lostProperty> lostPropertyList);
 void displayAllLostProperty();
 void contactMenu(Customer user);
 void displayUserProfile(Customer c);
+//new ones
+void makeBooking(Customer user);
+vector<Booking> readBookingsFile();
+void displayAllBookings(vector<Booking> bookings);
+Driver getDriverByEmail(string email);
+Customer getCustomerByEmail(string email);
+void updateBookingsFile(vector<Booking> bookings);
+void updateSchedule(vector<vector<string>> availableTimes, string filename);
+void createNewSchedule(string filename);
+string getDriverAvailabilityByTime(Driver driver, string time);
+void bookingOverflow(string driverEmail, string date, float halfHourBlocksOverflow, string bookingRef);
+string incrementDate(string date);
+void checkForSchedule(string filename);
+vector<vector<string>> readSchedule(string filename);
+vector<vector<string>> addNewDriversToSchedule(vector<vector<string>> schedule);
+
+
+
+
+
 
 int main() //start menu
 {
@@ -338,6 +387,19 @@ vector<Driver> readDriversFile() {
             getline(linestream, cell, ',');
             tempDriver.registration = cell;
 
+            //read driver start
+            /*getline(linestream, cell, ',');
+            tempDriver.driverStart = cell;*/
+            getline(linestream, cell, ',');
+            stringstream ssDriverStart(cell);
+            ssDriverStart >> tempDriver.driverStart;
+
+            //read driver end
+            getline(linestream, cell, ',');
+            stringstream ssDriverFinish(cell);
+            ssDriverFinish >> tempDriver.driverFinish;
+
+
             drivers.push_back(tempDriver);
         }
         driversFile.close();
@@ -457,7 +519,7 @@ void customerMenu(Customer user) {
         getline(cin, userSelect);
 
         if (userSelect == "1") {
-            // bookRide();
+            makeBooking(user);
         }
         else if (userSelect == "2") {
             displayUserProfile(user);
@@ -614,3 +676,697 @@ void displayAllLostProperty() {
 }
 
 //void claimLostProperty
+
+
+void makeBooking(Customer user) {
+    pageBreak();
+
+    string userInputDate = "12345678";
+    while (userInputDate.length() != 8 || userInputDate[2] != '/' || userInputDate[5] != '/') {
+        cout << "Type a date to see availability (DD/MM/YY): ";
+        getline(cin, userInputDate);
+    }
+
+    string date = userInputDate;
+
+
+    //enter date (DD/MM/YY) to display availability 
+    replace(date.begin(), date.end(), '/', '-');
+    vector <vector <string>> availableTimes = {
+        {},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},
+    };
+    string directory = "schedule/";
+    string extension = ".csv";
+
+    //string filename = "schedule/14-06-22.csv";
+    string filename = directory + date + extension;             //look for availibilityfile, if there is no file, then make one before opening
+
+    checkForSchedule(filename);
+
+
+    availableTimes = readSchedule(filename);
+
+    //----------------------------------------------------------------------------------------
+    //fstream availabiltyFile;
+    //availabiltyFile.open(filename, ios::in);
+    //if (availabiltyFile.is_open()) {
+    //    string line;
+    //    string cell;
+    //    int i = 0;
+    //    int rowSize = 11; //this wil be (amount of drivers * 2) + 1
+    //    while (getline(availabiltyFile, line) && i < availableTimes.size()) {
+    //        istringstream linestream(line);
+
+    //        for (int j = 0; j < rowSize; j++) {
+    //            getline(linestream, cell, ',');
+    //            availableTimes.at(i).push_back(cell);
+    //        }
+    //        i++;
+    //    }
+
+    //    availabiltyFile.close();
+    //}
+    //----------------------------------------------------------------------------------------------
+
+    /*cout << "availableTimes vector before updating with new drivers: " << endl;
+    for (int i = 0; i < availableTimes.size(); i++) {
+        for (int j = 0; j < availableTimes.at(i).size(); j++) {
+            cout << availableTimes.at(i).at(j) << ", ";
+        }cout << endl;
+    }cout << "__________________________________________" << endl;*/
+    // update old schedule to include new drivers
+        //
+
+    availableTimes = addNewDriversToSchedule(availableTimes);
+
+  /*  cout << "availableTimes vector after updating with new drivers: " << endl;
+    for (int i = 0; i < availableTimes.size(); i++) {
+        for (int j = 0; j < availableTimes.at(i).size(); j++) {
+            cout << availableTimes.at(i).at(j) << ", ";
+        }cout << endl;
+    }*/
+
+    //return; //delete
+
+    cout << "\nAvailable times: " << endl << endl;
+    for (int i = 0; i < availableTimes.size(); i++) {
+        int driversAvailable = 0;
+        for (int j = 0; j < availableTimes[i].size(); j++) {
+            if (j == 0) cout << availableTimes[i][0] << ": ";
+
+            if (availableTimes[i][j] == "available") {
+                //cout << "driver available ";
+                driversAvailable++;
+            }
+        }
+        if (driversAvailable > 0) cout << "available " << endl;
+        else cout << "Booking full " << endl;
+    }
+
+    // type in time to make booking
+
+    string userInputTime;
+    bool isUserInputValid = false;
+    string availableDriverEmail;
+    string* availableSlot = nullptr;
+
+    cout << "\nEnter time to make a booking (hour.mins):\nmust enter half hour block: ";
+    while (isUserInputValid == false)
+    {
+        getline(cin, userInputTime);
+        cout << userInputTime << " ";
+
+        // is time free? if no then try again
+        int driversAvailable = 0;
+        for (int i = 0; i < availableTimes.size(); i++) {
+            if (availableTimes[i][0] == userInputTime) {
+                //cout << "found " << endl;
+                for (int j = 0; j < availableTimes.at(i).size(); j++) {
+                    if (availableTimes[i][j] == "available") {
+                        availableDriverEmail = availableTimes[i][j - 1];
+                        availableSlot = &availableTimes[i][j];
+                        //cout << "and available" << endl;
+                        driversAvailable++;
+                    }
+                }
+            }
+        }
+
+        if (driversAvailable > 0) {
+            cout << "\nslot free to make booking" << endl;
+            isUserInputValid = true;
+        }
+        else cout << "slot is not free, please choose another time: ";
+    }
+
+
+    vector<Booking> bookings = readBookingsFile();
+    //displayAllBookings(bookings);
+    // make newBooking 
+    Booking newBooking;
+    string userInput;
+
+    cout << "\nMake booking for " << user.firstName << " " << user.lastName << endl;
+    cout << "date: " << date << "\t" << userInputTime << endl;
+    newBooking.bookingRef = "ref";
+    newBooking.bookingRef += to_string(bookings.size() + 1);
+    newBooking.customer = user;
+
+    //chooseAvailableDriver
+
+    newBooking.driver = getDriverByEmail(availableDriverEmail);
+
+
+    newBooking.date = date;
+    newBooking.time = userInputTime;
+    cout << "How long will your trip be? (in minutes, trip duration will be rounded to the next half hour): ";
+    int userInputDuration = 0, roundedUp = 0;
+    getline(cin, userInput);
+    stringstream ss(userInput);
+
+    //need to round new booking duration up to 30mins
+    ss >> userInputDuration;
+    roundedUp = ((userInputDuration / 30) * 30) + 30;
+
+    newBooking.duration = roundedUp;
+
+    cout << "Enter pickup location: ";
+    getline(cin, newBooking.startLocation);
+    cout << "Enter dropoff location: ";
+    getline(cin, newBooking.endLocation);
+    newBooking.cost = (newBooking.duration * 2.0);
+
+    cout << "\n--new Booking details--" << endl << endl;
+    cout << newBooking.bookingRef << "\t" << newBooking.customer.email << "\t" << newBooking.date << "\t" << newBooking.time << "\t"
+        << newBooking.duration << "\t" << newBooking.startLocation << "\t" << newBooking.endLocation << "\t$" << newBooking.cost << "\t" << newBooking.driver.email << endl;
+
+    //ask user to confirm Y/N
+    bool isUserSure = false;
+    while (isUserSure == false) {
+
+        cout << "\nAre you sure you want to make this booking? (Y/N) ";
+        getline(cin, userInput);
+        //toupper(userInput);
+
+        if (userInput == "Y") {
+            isUserSure = true;
+        }
+        else if (userInput == "N") {
+            cout << "cancelling booking" << endl;
+            return;
+        }
+        else {
+            cout << "Invalid Input" << endl;
+        }
+    }
+
+
+    // push newBooking to bookings
+    bookings.push_back(newBooking);
+
+    updateBookingsFile(bookings);
+
+    //put ref into available slot in availableTimes
+    //for loop to find time, driver, put in ref for start slot and following slots depending on booking.duration
+
+    int halfHourBlocks = newBooking.duration / 30; //need to do rounding somehow
+    //bool willBookingOverFlow;
+    int halfHourBlocksLeftThisDay = 1;
+    // newBooking.time   24.00
+    int halfHourBlocksOverflow = 0;
+    float convertedTime;
+    istringstream ssTime(newBooking.time);
+    ssTime >> convertedTime;
+    halfHourBlocksLeftThisDay = (24.0 - convertedTime) * 2;
+
+    halfHourBlocksOverflow = halfHourBlocks - halfHourBlocksLeftThisDay;
+
+
+
+    /*cout << "\nhalfHourBlocks: " << halfHourBlocks << endl;
+    cout << "halfHourBlocksLeftThisDay: " << halfHourBlocksLeftThisDay << endl;
+    cout << "halfHourBlockOverFlow: " << halfHourBlocksOverflow << endl;*/
+
+
+
+
+    //return; //delete 
+
+
+
+
+    if (halfHourBlocksOverflow > 0) {
+        bookingOverflow(newBooking.driver.email, date, halfHourBlocksOverflow, newBooking.bookingRef);     //checkforfile, ?makefile  // readSchedule //replace availanility for a driver for time 0.00 and following halfHourBlocks depending on halfHourBlocksOverflow
+    }
+
+
+    for (int i = 0; i < availableTimes.size(); i++) {
+        if (availableTimes.at(i).at(0) == userInputTime) {
+            for (int j = 0; j < availableTimes.at(i).size(); j++) {
+                if (availableTimes.at(i).at(j) == newBooking.driver.email) {
+                    for (int k = 0; k < halfHourBlocks && k < halfHourBlocksLeftThisDay; k++) {
+
+
+                        availableTimes.at(i + k).at(j + 1) = newBooking.bookingRef;           //must fix or break app                //currently won't overflow days
+                    }
+                }
+            }
+        }
+    }
+
+    updateSchedule(availableTimes, filename);
+    cout << "Booking successful" << endl;
+
+    // write to schedule/[date].csv
+    // check if schedule/[date].csv exists if not then make one
+    // vector <vector <string>> availableTimes = readAvailabilityFile(date);
+    // change availability information per driver based on date
+}
+
+vector<Booking> readBookingsFile() {
+    //this function will read bookings.csv and return vector
+    vector<Booking> bookings;
+    fstream bookingsFile;
+    Booking tempBooking;
+    bookingsFile.open("bookings.csv", ios::in);
+    if (bookingsFile.is_open()) {
+        string line;
+        string cell;
+        while (getline(bookingsFile, line)) {
+            istringstream linestream(line);
+
+            /*
+            string bookingRef;
+            Customer customer;
+            Driver driver;
+            string date;
+            string time;
+            string duration;
+            string startLocation;
+            string endLocation;
+            float cost;
+            */
+
+            getline(linestream, cell, ',');
+            tempBooking.bookingRef = cell;
+
+            getline(linestream, cell, ',');
+            string tempCustomerEmail = cell;
+            tempBooking.customer = getCustomerByEmail(tempCustomerEmail);
+
+
+            getline(linestream, cell, ',');
+            string tempDriverEmail = cell;
+            tempBooking.driver = getDriverByEmail(tempDriverEmail);
+
+            getline(linestream, cell, ',');
+            tempBooking.date = cell;
+
+            getline(linestream, cell, ',');
+            tempBooking.time = cell;
+
+            getline(linestream, cell, ',');
+            stringstream ssDuration(cell);
+            ssDuration >> tempBooking.duration;
+
+
+            getline(linestream, cell, ',');
+            tempBooking.startLocation = cell;
+
+            getline(linestream, cell, ',');
+            tempBooking.endLocation = cell;
+
+            getline(linestream, cell, ',');
+            stringstream ssCost(cell);
+            ssCost >> tempBooking.cost;
+
+
+            bookings.push_back(tempBooking);
+        }
+        bookingsFile.close();
+    }
+    return bookings;
+}
+
+void displayAllBookings(vector<Booking> bookings) {
+    cout << "\nDisplay all bookings" << endl;
+    for (auto b : bookings) {
+        cout << b.bookingRef << ", " << b.customer.email << ", " << b.driver.email << ", " << b.date << ", " << b.time << ", " << b.duration << ", " << b.startLocation << ", " << b.endLocation << ", $" << b.cost << endl;
+    }
+}
+
+Driver getDriverByEmail(string email) {
+    Driver chosenDriver;
+    vector<Driver> drivers = readDriversFile();
+    //for loop, search for email match
+    for (int i = 0; i < drivers.size(); i++) {
+        if (drivers[i].email == email)
+            chosenDriver = drivers[i];
+    }
+
+    return chosenDriver;
+}
+
+Customer getCustomerByEmail(string email) {
+    Customer customer;
+    vector<Customer> customers = readCustomerFile();
+    //for loop, search for email match
+    for (int i = 0; i < customers.size(); i++) {
+        if (customers[i].email == email)
+            customer = customers[i];
+    }
+
+    return customer;
+}
+
+void updateBookingsFile(vector<Booking> bookings) {
+    fstream bookingsFile;
+    bookingsFile.open("bookings.csv", ios::out);
+    if (bookingsFile.is_open()) {
+        for (int i = 0; i < bookings.size(); i++) {
+            bookingsFile << bookings[i].bookingRef << "," << bookings[i].customer.email << "," << bookings[i].driver.email << "," << bookings[i].date << "," << bookings[i].time <<
+                "," << bookings[i].duration << "," << bookings[i].startLocation << "," << bookings[i].endLocation << "," << bookings[i].cost << endl;
+        }
+        bookingsFile.close();
+    }
+}
+
+void updateSchedule(vector<vector<string>> availableTimes, string filename) {
+    fstream scheduleFile;
+    scheduleFile.open(filename, ios::out);
+    if (scheduleFile.is_open()) {
+        for (int i = 0; i < availableTimes.size(); i++) {
+            for (int j = 0; j < availableTimes[i].size(); j++) {
+                scheduleFile << availableTimes[i][j] << ",";
+
+            }
+            scheduleFile << endl;
+        }
+        scheduleFile.close();
+    }
+}
+
+void createNewSchedule(string filename) {
+    vector<vector<string>> newSchedule = { {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {},
+        {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, };
+    //newSchedule.reserve(100);
+    vector<Driver> drivers = readDriversFile();
+    vector<string> row;
+    //newSchedule = { "0.00","driver1@gmail.com","unstaffed","driver2@gmail.com","unstaffed" };
+    //0.00 = hour + '.' + mins; //drivers[i].email; //returnString{available, unstaffed} isWorking(time, driver);
+
+    int hour = 0;
+    string h = "";
+    string time = "";
+
+    for (int i = 0; i < 48; i++) { //loop through all times
+
+        if (i % 2 == 0) {
+            h = to_string(hour);
+            string mins = "00";
+            time = h + "." + mins;
+
+        }
+        else {
+            h = to_string(hour);
+            string mins = "30";
+            time = h + "." + mins;
+            hour++;
+        }
+        //cout << time << endl;
+        newSchedule.at(i).push_back(time);
+
+        //loop through list of drivers x 2? get email followed by "temp";
+        string availability = "temp";
+        for (int d = 0; d < drivers.size(); d++) {
+            //cout << drivers.at(d).email << ", " << availability << ", ";
+            availability = to_string(drivers.at(d).driverFinish);
+            availability = getDriverAvailabilityByTime(drivers.at(d), time);
+            //getDriverAvailabilityByTime(time) return a string{ available, unstaffed }
+
+            newSchedule.at(i).push_back(drivers.at(d).email);
+            newSchedule.at(i).push_back(availability);
+        }
+        //break; //delete this line
+    }
+
+    updateSchedule(newSchedule, filename); // change to filename when ready
+
+    //display newSchedule
+    /*cout << "\nDisplay from vector" << endl;
+    for (int i = 0; i < newSchedule.size(); i++) {
+        for (int j = 0; j < newSchedule.at(i).size(); j++) {
+            cout << newSchedule.at(i).at(j) << ", ";
+        }
+        cout << endl;
+    }*/
+}
+
+
+string getDriverAvailabilityByTime(Driver driver, string time) {
+    string availability = "available";
+    vector<float> availableTimes = { 0.0,0.3,1.0,1.3,2.0,2.3,3.0,3.3,4.0,4.3,5.0,5.3,6.0,6.3,7.0,7.3,8.0,8.3,9.0,9.3,
+        10.0,10.3,11.0,11.3,12.0,12.3,13.0,13.3,14.0,14.3,15.0,15.3,16.0,16.3,17.0,17.3,18.0,18.3,19.0,19.3,20.0,20.3,21.0,21.3,22.0,22.3,23.0,23.3,0.0,0.3,1.0,1.3,2.0,2.3,3.0,3.3,4.0,4.3,5.0,5.3,6.0,6.3,7.0,7.3,8.0,8.3,9.0,9.3,
+        10.0,10.3,11.0,11.3,12.0,12.3,13.0,13.3,14.0,14.3,15.0,15.3,16.0,16.3,17.0,17.3,18.0,18.3,19.0,19.3,20.0,20.3,21.0,21.3,22.0,22.3,23.0,23.3 };
+
+    //cout << driver.firstName << " works from " << driver.driverStart << " to " << driver.driverFinish << endl;
+
+        //find driver start, cut every thing before it
+    int removeEverythingBefore = 0;
+    for (int i = 0; i < availableTimes.size(); i++) {
+        if (availableTimes.at(i) == driver.driverStart) {
+            removeEverythingBefore = i;
+            break;
+        }
+    }
+    availableTimes.erase(availableTimes.begin(), availableTimes.begin() + removeEverythingBefore);
+    int removeEverythingAfter = 0;
+    for (int i = 0; i < availableTimes.size(); i++) {
+        if (availableTimes.at(i) == driver.driverFinish) {
+            removeEverythingAfter = i;
+            break;
+        }
+    }
+    availableTimes.erase(availableTimes.begin() + removeEverythingAfter, availableTimes.end());
+
+    //find driver end, cut everything after
+/*cout << "hours: ";
+for (int i = 0; i < availableTimes.size(); i++) {
+    cout << availableTimes.at(i) << ", ";
+}cout << endl;*/
+
+// covert string time to float
+    float convertedTime;
+    stringstream ssTime(time);
+    ssTime >> convertedTime;
+    //cout << "Time: " << time << "    converted time : " << convertedTime << endl;
+    //convertedTime = time
+    //check if time is in vector
+    for (int i = 0; i < availableTimes.size(); i++) {
+        if (availableTimes.at(i) == convertedTime) {
+            availability = "available";
+            break;
+        }
+        else {
+            availability = "unstaffed";
+        }
+    }
+    //if found return
+
+    //else return unstaffed
+
+    return availability;
+}
+
+
+void bookingOverflow(string driverEmail, string date, float halfHourBlocksOverflow, string bookingRef) {
+    //cout << "...booking overflow function called..." << endl;
+    //checkforfile, ?makefile  // readSchedule //replace availability for a driver for time 0.00 and following halfHourBlocks depending on halfHourBlocksOverflow
+    string followingDate = "";
+    followingDate = incrementDate(date);
+    //cout << "Date: " << date;
+    //cout << "\tFollowing Date: " << followingDate << endl;
+    //check for file containing following date 
+    string directory = "schedule/";
+    string extension = ".csv";
+
+
+    //string filename = "schedule/14-06-22.csv";
+    string filename = directory + followingDate + extension;
+    checkForSchedule(filename);
+    //change schedule
+    vector<vector<string>> schedule = readSchedule(filename);
+
+    //============================================================= updateNewDrivers
+    schedule = addNewDriversToSchedule(schedule);
+
+    //from time 0
+    for (int i = 0; i < schedule.size() && i < halfHourBlocksOverflow; i++) {
+        //loop through to find driver email // update following cell to ref
+        for (int j = 0; j < schedule.at(i).size(); j++) {
+            if (schedule.at(i).at(j) == driverEmail) {
+                schedule.at(i).at(j + 1) = bookingRef;          //change temp to ref
+            }
+        }
+
+    }
+
+
+
+
+
+
+
+
+    //display newSchedule
+    /*cout << "\nDisplay from vector:  " << filename << endl;
+    for (int i = 0; i < schedule.size(); i++) {
+        for (int j = 0; j < schedule.at(i).size(); j++) {
+            cout << schedule.at(i).at(j) << ", ";
+        }
+        cout << endl;
+    }*/
+
+    updateSchedule(schedule, filename);
+
+
+    //cout << "...booking overflow function finished...\n" << endl;
+}
+
+string incrementDate(string date) {
+    // cout << "\t...incrementDate function called..." << endl;
+    string newDate = "newDate";
+
+    string sDay = date.substr(0, 2);
+    stringstream ssDay(sDay);
+    int day;
+    ssDay >> day;
+    //cout << "sDay: " << sDay << "\tDay: " << day << endl;
+
+    string sMonth = date.substr(3, 2);
+    stringstream ssMonth(sMonth);
+    int month;
+    ssMonth >> month;
+    //cout << "sMonth: " << sMonth << "\tMonth: " << month << endl;
+
+
+    string sYear = date.substr(6, 2);
+    stringstream ssYear(sYear);
+    int year;
+    ssYear >> year;
+    //cout << "sYear: " << sYear << "\tyear: " << year << endl;
+
+
+    vector<int> daysInEachMonth = { 31,28,31,30,31,30,31,31,30,31,30,31 };
+
+    day++;
+    if (day >= daysInEachMonth.at(month - 1)) {
+        day = day - daysInEachMonth.at(month - 1);
+        month++;
+        if (month == 13) {
+            month = 1;
+            year++;
+        }
+    }
+
+    //cout << "New date before conversion to string: ";
+    //cout << day << "/" << month << "/" << year << endl;
+
+    //convert ins back to strings and add 0s
+
+    sDay = to_string(day);
+    if (sDay.length() == 1) {
+        sDay = "0" + sDay;
+    }
+
+    sMonth = to_string(month);
+    if (sMonth.length() == 1) {
+        sMonth = "0" + sMonth;
+    }
+    sYear = to_string(year);
+    if (sYear.length() == 1) {
+        sYear = "0" + sYear;
+    }
+
+    newDate = sDay + "-" + sMonth + "-" + sYear;
+    // cout << "newDate: " << newDate << endl;
+    // cout << "\t...incrementDate function finished..." << endl;
+    return newDate; //must return (DD-MM-YY)
+}
+
+void checkForSchedule(string filename) {
+    fstream checkForScheduleFile;
+    string checkLine;
+    checkForScheduleFile.open(filename, ios::in);
+    if (checkForScheduleFile.is_open()) {
+
+        getline(checkForScheduleFile, checkLine);
+
+        checkForScheduleFile.close();
+    }
+
+    if (checkLine.length() > 0) {
+        //cout << "fileExists" << endl;
+    }
+    else {
+        //cout << "must create file" << endl;
+        createNewSchedule(filename);
+    }
+}
+
+vector<vector<string>> readSchedule(string filename) {
+    vector<vector<string>> schedule = {
+        {},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},
+    };
+    vector<Driver> drivers = readDriversFile();
+
+    fstream availabiltyFile;
+    availabiltyFile.open(filename, ios::in);
+    if (availabiltyFile.is_open()) {
+        string line;
+        string cell;
+        int i = 0;
+        int rowSize = 11; //this wil be (amount of drivers * 2) + 1
+        rowSize = (drivers.size() * 2) + 1;
+        //rowSize = 100; //delete this
+
+        while (getline(availabiltyFile, line) && i < schedule.size()) {
+            istringstream linestream(line);
+
+            for (int j = 0; j < rowSize; j++) {
+                getline(linestream, cell, ',');
+                schedule.at(i).push_back(cell);
+            }
+            i++;
+        }
+
+        availabiltyFile.close();
+    }
+
+    return schedule;
+}
+
+vector<vector<string>> addNewDriversToSchedule(vector<vector<string>> schedule) {
+    vector<Driver> drivers = readDriversFile();
+
+    //cout << "is drivers reading right?" << endl;
+    //for (int i = 0; i < drivers.size(); i++) {
+    //    cout << drivers.at(i).email << endl;
+    //}
+
+
+    //drivers.size() is 6 - 
+    int cellsToBeUpdated = 0; // amount of cells at end of each row that need updating
+    // find 1st empty space in schedule.at(0) row
+    for (int i = 0; i < schedule.at(0).size(); i++) {
+        if (schedule.at(0).at(i) == "") {
+            cellsToBeUpdated++;
+            schedule.at(0).at(i) = "temp";
+        }
+    }
+
+    //cout << "cellsToBeUpdated: " << cellsToBeUpdated << endl << endl;
+    //int driversToAdd = cellsToBeUpdated / 2;
+    //loop through rows
+    for (int i = 0; i < schedule.size(); i++) {
+        //loop from end of each row
+        int k = 0;
+        for (int j = 0; j < cellsToBeUpdated; j++) {
+            if (j % 2 == 0) {
+                schedule.at(i).at(schedule.at(i).size() - 1 - j) = getDriverAvailabilityByTime(drivers.at(drivers.size() - 1 - k), schedule.at(i).at(0));
+
+            }
+            else {
+                schedule.at(i).at(schedule.at(i).size() - 1 - j) = drivers.at(drivers.size() - 1 - k).email;
+                k++;
+            }
+
+        }
+    }
+
+
+
+    return schedule;
+}
+
+
