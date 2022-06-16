@@ -98,16 +98,19 @@ void displayAllDrivers(vector<Driver>driversList);
 void displayAllAdmin(vector<Admin>adminList);
 void updateCustomersFile(vector<Customer> customers);
 string createAndCheckPassword();
+void customerMenu(Customer user);
 void pageBreak();
 void submitLostProperty();
 vector<lostProperty> readLostPropertyFile();
 void updateLostPropertyFile(vector<lostProperty> lostPropertyList);
 void displayAllLostProperty();
+void contactMenu(Customer user);
+void displayUserProfile(Customer c);
 
 int main() //start menu
 {
-    string userInput{};
-    bool keepRunning{true};
+    string userInput, userSelect, userSupport{};
+    bool keepRunning{ true };
     pageBreak();
     while (keepRunning) {
         //start menu
@@ -151,7 +154,7 @@ void registerNewLogin() {
     bool containsAddressSign{ false };
 
     //promt user to enter email
-    while(containsAddressSign == false) {
+    while (containsAddressSign == false) {
         cout << "\nEnter email (This will be your username): " << endl;
         cout << "(note: type 'e' to cancel and exit)" << endl;
         getline(cin, unverifiedEmail);
@@ -188,7 +191,7 @@ void registerNewLogin() {
     if (newCustomer.phoneNumber == "e") return; //if user types 'e' for exit, they will return to start menu
 
     //check password    
-    
+
     newCustomer.password = createAndCheckPassword();
     customerList.push_back(newCustomer);
 
@@ -207,6 +210,10 @@ void login() {
 
     string inputUsername;
     string inputPassword;
+    Customer customer;
+    Driver driver;
+    Admin admin;
+
     pageBreak();
     cout << "Login" << endl;
     cout << "*****" << endl;
@@ -225,6 +232,7 @@ void login() {
         for (int i = 0; i < customerList.size(); i++) {
             if (inputUsername == customerList[i].email && inputPassword == customerList[i].password) {
                 userAuthority = "customer";
+                customer = customerList[i];
                 foundUsernamePasswordMatch = true;
             }
         }
@@ -232,6 +240,7 @@ void login() {
         for (int i = 0; i < driversList.size(); i++) {
             if (inputUsername == driversList[i].email && inputPassword == driversList[i].password) {
                 userAuthority = "driver";
+                driver = driversList[i];
                 foundUsernamePasswordMatch = true;
             }
         }
@@ -239,18 +248,18 @@ void login() {
         for (int i = 0; i < adminList.size(); i++) {
             if (inputUsername == adminList[i].email && inputPassword == adminList[i].password) {
                 userAuthority = "admin";
+                admin = adminList[i];
                 foundUsernamePasswordMatch = true;
             }
         }
 
-        if(foundUsernamePasswordMatch != true) cout << "Incorrect username or password, try again (or enter 'e' to exit)" << endl;
+        if (foundUsernamePasswordMatch != true) cout << "Incorrect username or password, try again (or enter 'e' to exit)" << endl;
     }
 
     cout << "correct name and password" << endl;
 
     if (userAuthority == "customer") {
-        cout << "You are a customer" << endl;
-        //customerMenu(userName); 
+        customerMenu(customer); 
     }
     else if (userAuthority == "driver") {
         cout << "You are a driver" << endl;
@@ -369,6 +378,8 @@ vector<Admin> readAdminsFile() {
     return admin;
 }
 
+
+
 void displayAllCostomers(vector<Customer>customerList) {
     //displays all customers and their details from a vector
     for (auto c : customerList) {
@@ -428,12 +439,116 @@ string createAndCheckPassword() {
     return tempPassword;
 }
 
+void customerMenu(Customer user) {
+    pageBreak();
+    string userSelect;
+    cout << "Welcome " << user.firstName << " " << user.lastName << ", What would you like to do today? Select from the options below.";
+
+    while (true) {
+
+        cout << "\nUser Options" << endl;
+        cout << "********" << endl;
+        cout << "1. View/Book Rides" << endl;
+        cout << "2. View/Edit User Info" << endl;
+        cout << "3. View Transactions" << endl;
+        cout << "4. Contact Administration" << endl;
+        cout << "5. Log Out" << endl;
+
+        getline(cin, userSelect);
+
+        if (userSelect == "1") {
+            // bookRide();
+        }
+        else if (userSelect == "2") {
+            displayUserProfile(user);
+        }
+        else if (userSelect == "3") {
+            // userTransactions();
+
+        }
+        else if (userSelect == "4") {
+            contactMenu(user);
+        }
+        else if (userSelect == "5") {
+            cout << "User Logged Out Successfully" << endl;
+            //keepRunning = false;
+            return;
+        }
+        else {
+            cout << "Invalid Input, Choose from the menu" << endl;
+        }
+    }
+}
+
+void contactMenu(Customer user) {
+    pageBreak();
+    cout << "Select an option your query relates to from the menu below!";
+
+    string userInput;
+    string enquiryMessage;
+    string driverName;
+    string complaintMessage;
+    string itemDesc;
+    
+    cout << "\nAdmin Support" << endl;
+    cout << "********" << endl;
+    cout << "1. General Enquiries" << endl;
+    cout << "2. Complaints" << endl;
+    cout << "3. Lost Property" << endl;
+    cout << "4. Return to main menu" << endl;
+
+    getline(cin, userInput);
+
+    if (userInput == "1") {
+        cout << "General Enquiries";
+        cout << "\n-----------------------------\n";
+        cout << "Enter enquiry message below or press e to return:";
+        getline(cin, enquiryMessage);
+        if (enquiryMessage == "e") return; //if user types 'e' for exit, they will return to start menu
+
+    }
+    else if (userInput == "2") {
+        cout << "Complaints Form";
+        cout << "\n-----------------------------\n";
+        cout << "Enter Driver Name your complaint is about or press e to return:";
+        getline(cin, driverName); 
+        if (driverName == "e") return; //if user types 'e' for exit, they will return to start menu
+        cout << "Enter your complaint message below or press e to return:";
+        getline(cin, complaintMessage);
+        if (complaintMessage == "e") return; //if user types 'e' for exit, they will return to start menu
+    }
+    else if (userInput == "3") {
+        cout << "Lost Property Claims";
+        cout << "\n-----------------------------\n";
+        cout << "Enter item description below or press e to return:";
+        getline(cin, itemDesc);
+        if (itemDesc == "e") return; //if user types 'e' for exit, they will return to start menu
+
+    }
+    else if (userInput == "4") {
+        //customerMenu();
+        return;
+    }
+    else {
+        cout << "Invalid Input, Choose from the menu" << endl;
+        contactMenu(user);
+    }
+}
+
+void displayUserProfile(Customer c) { //====================================== still need fixing
+    pageBreak();
+    cout << "Email: " << c.email << endl;
+    cout << "Name: " << c.firstName << " " << c.lastName << endl;
+    cout << "Ph number: " << c.phoneNumber << endl;
+    cout << endl;
+}
+
 void pageBreak() {
     //complex line making algorithim 
     cout << "\n-------------------------------------------\n" << endl;
 }
 
-void submitLostProperty(){
+void submitLostProperty() {
     //this function promts user to add to the list of lost property and will update the lostProperty.csv
     pageBreak();
     vector<lostProperty> lostPropertyList = readLostPropertyFile();
