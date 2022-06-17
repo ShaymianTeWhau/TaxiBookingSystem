@@ -313,7 +313,6 @@ void login() {
     else if (userAuthority == "admin") {
         //cout << "You are admin" << endl;
         adminMenu(admin);
-
     }
 }
 
@@ -743,10 +742,14 @@ void makeBooking(Customer user) {
     string availableDriverEmail;
     string* availableSlot = nullptr;
 
+    cout << "note: type 'e' at any stage to exit and cancel booking" << endl;
+
     cout << "\nEnter time to make a booking (hour.mins):\nmust enter half hour block: ";
     while (isUserInputValid == false) // loop checks if user chose a vailid time that is also not booked
     {
         getline(cin, userInputTime);
+        if (userInputTime == "e") return;
+
         cout << userInputTime << " ";
 
         // counting how many drivers are available for chosen time
@@ -770,7 +773,7 @@ void makeBooking(Customer user) {
             cout << "\nslot free to make booking" << endl;
             isUserInputValid = true;
         }
-        else cout << "slot is not free, please choose another time: ";
+        else cout << "either invalid input or slot is not free, please choose another time: ";
     }
 
     // input bookings.csv to vector<Booking> bookings 
@@ -791,20 +794,42 @@ void makeBooking(Customer user) {
     newBooking.date = date;
     newBooking.time = userInputTime;
     cout << "How long will your trip be? (in minutes, trip duration will be rounded to the next half hour): ";
-    int userInputDuration = 0, roundedUp = 0;
-    getline(cin, userInput);
-    stringstream ss(userInput);
 
-    // round new booking duration up to nearest 30mins
-    ss >> userInputDuration;
+    // stop people from booking too long // maximum trip duration, 180mins
+    int maxTripDuration = 180;
+    int userInputDuration = 0, roundedUp = 0;
+    while (userInputDuration > maxTripDuration || userInputDuration == 0) {
+        getline(cin, userInput);
+        if (userInput == "e") return;
+
+        stringstream ss(userInput);
+
+        ss >> userInputDuration;
+
+        if (userInputDuration > maxTripDuration) {
+            cout << "Trip duration cannot be more than " << maxTripDuration << " minutes" << endl;
+            cout << "How long will your trip be?" << endl;
+        }
+        else if (userInputDuration == 0) {
+            cout << "Trip duration cannot be 0" << endl;
+            cout << "How long will your trip be?" << endl;
+
+        }
+
+    }
+        // round new booking duration up to nearest 30mins
     roundedUp = ((userInputDuration / 30) * 30) + 30;
 
     newBooking.duration = roundedUp;
 
     cout << "Enter pickup location: ";
     getline(cin, newBooking.startLocation);
+    if (newBooking.startLocation == "e") return;
+
     cout << "Enter dropoff location: ";
     getline(cin, newBooking.endLocation);
+    if (newBooking.endLocation == "e") return;
+
     newBooking.cost = (newBooking.duration * 2.0);
 
     // display new booking
@@ -825,7 +850,7 @@ void makeBooking(Customer user) {
         if (userInput == "Y") {
             isUserSure = true;
         }
-        else if (userInput == "N") {
+        else if (userInput == "N" || userInput == "e") {
             cout << "cancelling booking" << endl;
             return;
         }

@@ -1,11 +1,11 @@
 ﻿  TaxiBookingSystem.cpp
-C:\Users\Owner\Documents\Software_Projects\TaxiBooking-DEMO-\TaxiBookingSystem.cpp(808,44): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-C:\Users\Owner\Documents\Software_Projects\TaxiBooking-DEMO-\TaxiBookingSystem.cpp(853,56): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
-C:\Users\Owner\Documents\Software_Projects\TaxiBooking-DEMO-\TaxiBookingSystem.cpp(857,56): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-C:\Users\Owner\Documents\Software_Projects\TaxiBooking-DEMO-\TaxiBookingSystem.cpp(1037,149): warning C4305: 'initializing': truncation from 'double' to '_Ty'
+C:\Users\Owner\Documents\Software_Projects\TaxiBooking-DEMO-\TaxiBookingSystem.cpp(833,44): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\Owner\Documents\Software_Projects\TaxiBooking-DEMO-\TaxiBookingSystem.cpp(878,56): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+C:\Users\Owner\Documents\Software_Projects\TaxiBooking-DEMO-\TaxiBookingSystem.cpp(882,56): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\Owner\Documents\Software_Projects\TaxiBooking-DEMO-\TaxiBookingSystem.cpp(1062,149): warning C4305: 'initializing': truncation from 'double' to '_Ty'
           with
           [
               _Ty=float
           ]
-C:\Users\Owner\Documents\Software_Projects\TaxiBooking-DEMO-\TaxiBookingSystem.cpp(1194,43): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\Owner\Documents\Software_Projects\TaxiBooking-DEMO-\TaxiBookingSystem.cpp(1219,43): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
   TaxiBookingSystem.vcxproj -> C:\Users\Owner\Documents\Software_Projects\TaxiBooking-DEMO-\x64\Debug\TaxiBookingSystem.exe
