@@ -128,6 +128,8 @@ void displayAllAdmin(vector<Admin>adminList);
 void updateCustomersFile(vector<Customer> customers);
 string createAndCheckPassword();
 void customerMenu(Customer user);
+void driverMenu(Driver user);
+void adminMenu(Admin user);
 void pageBreak();
 void submitLostProperty();
 vector<lostProperty> readLostPropertyFile();
@@ -305,12 +307,12 @@ void login() {
         customerMenu(customer); 
     }
     else if (userAuthority == "driver") {
-        cout << "You are a driver" << endl;
-        //driverMenu(userName);
+        //cout << "You are a driver" << endl;
+        driverMenu(driver);
     }
     else if (userAuthority == "admin") {
-        cout << "You are admin" << endl;
-        //adminMenu(userName);
+        //cout << "You are admin" << endl;
+        adminMenu(admin);
 
     }
 }
@@ -492,6 +494,7 @@ string createAndCheckPassword() {
 void customerMenu(Customer user) {
     pageBreak();
     string userSelect;
+    cout << "Logged in as customer" << endl;
     cout << "Welcome " << user.firstName << " " << user.lastName << ", What would you like to do today? Select from the options below.";
 
     while (true) {
@@ -528,6 +531,20 @@ void customerMenu(Customer user) {
             cout << "Invalid Input, Choose from the menu" << endl;
         }
     }
+}
+
+void driverMenu(Driver user) {
+    cout << "Logged in as Driver" << endl;
+    cout << "Welcome " << user.firstName << " " << user.lastName << endl;
+    
+
+}
+
+void adminMenu(Admin user) {
+    cout << "Logged in as Admin" << endl;
+    cout << "Welcome " << user.firstName << " " << user.lastName << endl;
+
+
 }
 
 void contactMenu(Customer user) {
@@ -1013,7 +1030,6 @@ void createNewSchedule(string filename) {
 
 }
 
-
 string getDriverAvailabilityByTime(Driver driver, string time) {
     string availability = "available";
     vector<float> availableTimes = { 0.0,0.3,1.0,1.3,2.0,2.3,3.0,3.3,4.0,4.3,5.0,5.3,6.0,6.3,7.0,7.3,8.0,8.3,9.0,9.3,
@@ -1058,7 +1074,6 @@ string getDriverAvailabilityByTime(Driver driver, string time) {
     return availability;
 }
 
-
 void bookingOverflow(string driverEmail, string date, float halfHourBlocksOverflow, string bookingRef) {
     //checkforfile, ?makefile  // readSchedule //replace availability for a driver for time 0.00 and following halfHourBlocks depending on halfHourBlocksOverflow
     string followingDate = "";
@@ -1083,7 +1098,7 @@ void bookingOverflow(string driverEmail, string date, float halfHourBlocksOverfl
         //loop through to find driver email // update following cell to ref
         for (int j = 0; j < schedule.at(i).size(); j++) {
             if (schedule.at(i).at(j) == driverEmail) {
-                schedule.at(i).at(j + 1) = bookingRef;          //change temp to ref
+                schedule.at(i).at(j + 1) = bookingRef;          
             }
         }
 
@@ -1094,6 +1109,7 @@ void bookingOverflow(string driverEmail, string date, float halfHourBlocksOverfl
 }
 
 string incrementDate(string date) {
+    // pass in a date and this function will return the following date
     string newDate = "newDate";
 
     string sDay = date.substr(0, 2);
