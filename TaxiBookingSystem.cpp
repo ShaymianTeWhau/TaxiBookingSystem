@@ -1,9 +1,10 @@
 #include <iostream>
-#include <fstream> //read and write to files
-#include <vector> //
+#include <fstream> // read and write to files
+#include <vector> // 
 #include <string>
 #include <sstream>
 #include <algorithm>
+#include <ctype.h> // isdigit()
 using namespace std;
 
 struct Customer {
@@ -694,10 +695,23 @@ void makeBooking(Customer user) {
 
     // promt user to input date
     string userInputDate = "12345678";
-    while (userInputDate.length() != 8 || userInputDate[2] != '/' || userInputDate[5] != '/') { // while loop validating date format, correct length and must contain 2x '/'
+    int digitCount = 0;
+    while (userInputDate.length() != 8 || userInputDate[2] != '/' || userInputDate[5] != '/' || digitCount != 6 ) { // while loop validating date format, correct length and must contain 2x '/' and 6 integers
+        digitCount = 0;
         cout << "Type a date to see availability (DD/MM/YY): ";
         getline(cin, userInputDate);
+
+        // loop through userInputDate to ensure 6 integers were used
+        for (int i = 0; i < userInputDate.length(); i++) {
+            if (isdigit(userInputDate[i])) {
+                digitCount++;
+            }
+        }
+        
+        
+
     }
+    return; // delete this line
 
     string date = userInputDate;
 
