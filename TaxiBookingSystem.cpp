@@ -693,26 +693,78 @@ void makeBooking(Customer user) {
     // ==================================================================================================================================================
 
 
-    // promt user to input date
+    // promt user to input date, then validate date format ( DD/MM/YY )
     string userInputDate = "12345678";
     int digitCount = 0;
-    while (userInputDate.length() != 8 || userInputDate[2] != '/' || userInputDate[5] != '/' || digitCount != 6 ) { // while loop validating date format, correct length and must contain 2x '/' and 6 integers
+    bool isDateValid = true;
+    string sMonth;
+    int month = 0;
+    string sDay;
+    int day = 0;
+    string sYear;
+    int year = 0;
+    vector<int> daysInEachMonth = { 31,28,31,30,31,30,31,31,30,31,30,31 };
+
+    do {
+        isDateValid = true;
         digitCount = 0;
+        // promt user
         cout << "Type a date to see availability (DD/MM/YY): ";
         getline(cin, userInputDate);
+        // validate length
+        if (userInputDate.length() != 8) {
+            isDateValid = false;
+            cout << "Incorrect string length: " << userInputDate.length() << "\t" << "isDateValid: " << isDateValid << endl;
+        }
+        // check for 2 instances of '/'
+        if (userInputDate[2] != '/' || userInputDate[5] != '/') {
+            isDateValid = false;
+            cout << "Incorrect '/': " << "\t" << "isDateValid: " << isDateValid << endl;
 
+        }
+        // ensure digit count is 6
         // loop through userInputDate to ensure 6 integers were used
         for (int i = 0; i < userInputDate.length(); i++) {
             if (isdigit(userInputDate[i])) {
                 digitCount++;
             }
         }
-        
-        
+        if (digitCount != 6) {
+            isDateValid = false;
+        }
 
-    }
-    return; // delete this line
+        // validate date exists, for exmaple, the 31st of February is invalid
+        if (isdigit(userInputDate[0]) && isdigit(userInputDate[1]) && isdigit(userInputDate[3]) && isdigit(userInputDate[4]) && isdigit(userInputDate[6]) && isdigit(userInputDate[7])) // to ensure program does not crash
+        {
+            string sMonth = userInputDate.substr(3, 2);
+            stringstream ssMonth(sMonth);
+            ssMonth >> month;
+            string sDay = userInputDate.substr(0, 2);
+            stringstream ssDay(sDay);
+            ssDay >> day;
+        }
+        // month cannot be over 12
+        // cout << "month: " << month << endl;
+        if (month < 1 || month > 12) {
+            isDateValid = false;
+            cout << "Invalid month" << endl;
+        }
+        // Day cannot be over 28,30,31 depending on month                                                //======= test this more ==========
+        if (month < 13) {
+            cout << "day: " << day << endl;
+            if (day < 1 || day > daysInEachMonth.at(month - 1)) {
+                isDateValid = false;
+                cout << "month " << month << ", does not contain " << day << " days" << endl;
+            }
+        }
 
+        //validate date hasn't already passed
+
+        //validate date isn't too far in the future
+        
+    } while (isDateValid == false);
+    //cout << "Date: " << userInputDate << " is valid";  return; // delete this line
+    
     string date = userInputDate;
 
     // converting date format ( DD/MM/YY ) to a schedule filename ( schedule/ DD-MM-YY.csv )
