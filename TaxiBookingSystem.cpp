@@ -5,6 +5,7 @@
 #include <sstream>
 #include <algorithm>
 #include <ctype.h> // isdigit()
+#include <ctime>
 using namespace std;
 
 struct Customer {
@@ -152,6 +153,8 @@ string incrementDate(string date);
 void checkForSchedule(string filename);
 vector<vector<string>> readSchedule(string filename);
 vector<vector<string>> addNewDriversToSchedule(vector<vector<string>> schedule);
+bool hasDatePassed(string date);
+bool isDateWithinTimeFrame(string date, int timeFrame);
 
 int main() //start menu
 {
@@ -692,7 +695,6 @@ void makeBooking(Customer user) {
     // the booking details will be written into bookings.csv and to the schedule/ directory in a time schedule named by the date ( schedule/ DD-MM-YY.csv )
     // ==================================================================================================================================================
 
-
     // promt user to input date, then validate date format ( DD/MM/YY )
     string userInputDate = "12345678";
     int digitCount = 0;
@@ -704,6 +706,7 @@ void makeBooking(Customer user) {
     string sYear;
     int year = 0;
     vector<int> daysInEachMonth = { 31,28,31,30,31,30,31,31,30,31,30,31 };
+    int timeFrame = 90;
 
     do {
         isDateValid = true;
@@ -712,57 +715,72 @@ void makeBooking(Customer user) {
         cout << "Type a date to see availability (DD/MM/YY): ";
         getline(cin, userInputDate);
         // validate length
-        if (userInputDate.length() != 8) {
-            isDateValid = false;
-            cout << "Incorrect string length: " << userInputDate.length() << "\t" << "isDateValid: " << isDateValid << endl;
-        }
-        // check for 2 instances of '/'
-        if (userInputDate[2] != '/' || userInputDate[5] != '/') {
-            isDateValid = false;
-            cout << "Incorrect '/': " << "\t" << "isDateValid: " << isDateValid << endl;
+        if (userInputDate.length() == 8) {
 
-        }
-        // ensure digit count is 6
-        // loop through userInputDate to ensure 6 integers were used
-        for (int i = 0; i < userInputDate.length(); i++) {
-            if (isdigit(userInputDate[i])) {
-                digitCount++;
-            }
-        }
-        if (digitCount != 6) {
-            isDateValid = false;
-        }
-
-        // validate date exists, for exmaple, the 31st of February is invalid
-        if (isdigit(userInputDate[0]) && isdigit(userInputDate[1]) && isdigit(userInputDate[3]) && isdigit(userInputDate[4]) && isdigit(userInputDate[6]) && isdigit(userInputDate[7])) // to ensure program does not crash
-        {
-            string sMonth = userInputDate.substr(3, 2);
-            stringstream ssMonth(sMonth);
-            ssMonth >> month;
-            string sDay = userInputDate.substr(0, 2);
-            stringstream ssDay(sDay);
-            ssDay >> day;
-        }
-        // month cannot be over 12
-        // cout << "month: " << month << endl;
-        if (month < 1 || month > 12) {
-            isDateValid = false;
-            cout << "Invalid month" << endl;
-        }
-        // Day cannot be over 28,30,31 depending on month                                                //======= test this more ==========
-        if (month < 13) {
-            cout << "day: " << day << endl;
-            if (day < 1 || day > daysInEachMonth.at(month - 1)) {
+            // check for 2 instances of '/'
+            if (userInputDate[2] != '/' || userInputDate[5] != '/') {
                 isDateValid = false;
-                cout << "month " << month << ", does not contain " << day << " days" << endl;
+                cout << "Incorrect '/'" << endl;
+
+            }
+
+            // ensure digit count is 6
+            // loop through userInputDate to ensure 6 integers were used
+            for (int i = 0; i < userInputDate.length(); i++) {
+                if (isdigit(userInputDate[i])) {
+                    digitCount++;
+                }
+            }
+            if (digitCount != 6) {
+                isDateValid = false;
+            }
+
+            // validate date exists, for exmaple, the 31st of February is invalid
+            if (isdigit(userInputDate[0]) && isdigit(userInputDate[1]) && isdigit(userInputDate[3]) && isdigit(userInputDate[4]) && isdigit(userInputDate[6]) && isdigit(userInputDate[7])) // to ensure program does not crash
+            {
+                //validate date hasn't already passed
+                if (hasDatePassed(userInputDate)) {
+                    isDateValid = false;
+                    cout << "The date you have entered has already passed" << endl;
+                }
+                //validate date isn't too far in the future
+
+                if (isDateWithinTimeFrame(userInputDate, timeFrame) == false && hasDatePassed(userInputDate) == false) {
+                    isDateValid = false;
+                    cout << "The date you entered is too far in the future, enter a date less than " << timeFrame << " days away" << endl;
+                }
+
+                string sMonth = userInputDate.substr(3, 2);
+                stringstream ssMonth(sMonth);
+                ssMonth >> month;
+                string sDay = userInputDate.substr(0, 2);
+                stringstream ssDay(sDay);
+                ssDay >> day;
+            }
+            // month cannot be over 12
+            // cout << "month: " << month << endl;
+            if (month < 1 || month > 12) {
+                isDateValid = false;
+                cout << "Invalid month" << endl;
+            }
+            // Day cannot be over 28,30,31 depending on month                                                //======= test this more ==========
+            if (month < 13) {
+                //cout << "day: " << day << endl;
+                if (day < 1 || day > daysInEachMonth.at(month - 1)) {
+                    isDateValid = false;
+                    cout << "month " << month << ", does not contain " << day << " days" << endl;
+                }
             }
         }
+        else {
+            isDateValid = false;
+            cout << "Date format not valid" << endl;
+        }
 
-        //validate date hasn't already passed
-
-        //validate date isn't too far in the future
-        
     } while (isDateValid == false);
+
+    //cout << "Date: " << userInputDate << " is valid"; return;                           // delete this line
+    
     //cout << "Date: " << userInputDate << " is valid";  return; // delete this line
     
     string date = userInputDate;
@@ -1332,6 +1350,146 @@ vector<vector<string>> addNewDriversToSchedule(vector<vector<string>> schedule) 
 
 
     return schedule;
+}
+
+
+bool hasDatePassed(string date) {
+    //cout << "========================================\n\thasDatePassed function called...\n" << endl;
+    bool dateHasPassed = false;
+    // date =  "DD/MM/YY"
+    int day = 0;
+    int month = 0;
+    int year = 0;
+
+    string sMonth = date.substr(3, 2);
+    stringstream ssMonth(sMonth);
+    ssMonth >> month;
+    string sDay = date.substr(0, 2);
+    stringstream ssDay(sDay);
+    ssDay >> day;
+    string sYear = date.substr(6, 2);
+    stringstream ssYear(sYear);
+    ssYear >> year;
+
+    //cout << "date entered: " << day << "-" << month << "-" << year << endl;
+
+    // get todays date
+    struct tm newtime;
+    time_t now = time(0);
+    localtime_s(&newtime, &now);
+
+    // convert todays date
+    //cout << "Todays date: " << endl;
+    ////cout << "now: " << now << endl;
+    //cout << "day: " << newtime.tm_mday << endl;
+    //cout << "Month: " << 1 + newtime.tm_mon << endl;
+    //cout << "year: " << ( -100) + newtime.tm_year << endl;
+
+    // compare year 
+    if (year < ((-100) + newtime.tm_year)) {
+        dateHasPassed = true;
+    }
+
+    // compare month // only if we are comparing the same year
+    if (month < (1 + newtime.tm_mon) && year == ((-100) + newtime.tm_year)) {
+        dateHasPassed = true;
+    }
+
+    // compare day // only if we are comparing the same year and the same month
+    if (day < newtime.tm_mday && month == (1 + newtime.tm_mon) && year == ((-100) + newtime.tm_year)) {
+        dateHasPassed = true;
+    }
+
+    //cout << "\n\thasDatePassed function ended...\n========================================" << endl;
+    return dateHasPassed;
+}
+
+bool isDateWithinTimeFrame(string date, int timeFrame) {
+    bool withinTimeFrame = true;
+    // date entered =  "DD/MM/YY"
+    // convert date entered to integers
+    int day = 0;
+    int month = 0;
+    int year = 0;
+
+    string sDay = date.substr(0, 2);
+    stringstream ssDay(sDay);
+    ssDay >> day;
+    string sYear = date.substr(6, 2);
+    string sMonth = date.substr(3, 2);
+    stringstream ssMonth(sMonth);
+    ssMonth >> month;
+    stringstream ssYear(sYear);
+    ssYear >> year;
+
+    // get todays date
+    struct tm newtime;
+    time_t now = time(0);
+    localtime_s(&newtime, &now);
+
+    // convert todays date to string (DD/MM/YY)
+    string nowDay = to_string(newtime.tm_mday);
+    if (nowDay.length() == 1) {
+        nowDay = "0" + nowDay;
+    }
+
+    string nowMonth = to_string(1 + newtime.tm_mon);
+    if (nowMonth.length() == 1) {
+        nowMonth = "0" + nowMonth;
+    }
+
+    string nowYear = to_string((-100) + newtime.tm_year);
+    if (nowYear.length() == 1) {
+        nowYear = "0" + nowYear;
+    }
+
+    string todaysDate = nowDay + "/" + nowMonth + "/" + nowYear;
+    //cout << "Today: " << todaysDate << endl;
+
+    // use incrementDate function in a loop?
+    string cutOffDate = todaysDate;
+    for (int i = 0; i < timeFrame; i++) {
+        cutOffDate = incrementDate(cutOffDate);
+    }
+    //cout << "cut off date = " << cutOffDate << endl;
+
+    // ensure that date entered into function is less than the cut off date
+    int cutOffDay = 0;
+    int cutOffMonth = 0;
+    int cutOffYear = 0;
+
+    string sCutOffDay = cutOffDate.substr(0, 2);
+    stringstream ssCutOffDay(sCutOffDay);
+    ssCutOffDay >> cutOffDay;
+
+    string sCutOffMonth = cutOffDate.substr(3, 2);
+    stringstream ssCutOffMonth(sCutOffMonth);
+    ssCutOffMonth >> cutOffMonth;
+
+    string sCutOffYear = cutOffDate.substr(6, 2);
+    stringstream ssCutOffYear(sCutOffYear);
+    ssCutOffYear >> cutOffYear;
+
+    // compare year // if year entered is more than cutoff year then withinTimeFrame = false
+    if (year > cutOffYear) {
+        withinTimeFrame = false;
+        //cout << "cut off year exceeded. cutOffYear: " << cutOffYear << endl;
+    }
+
+    // compare month
+    if (month > cutOffMonth && year == cutOffYear) {
+        withinTimeFrame = false;
+        //cout << "cut off month exceeded. cutOffMonth: " << cutOffMonth << endl;
+    }
+
+    // compare day
+    if (day > cutOffDay && year == cutOffYear && month == cutOffMonth) {
+        withinTimeFrame = false;
+        //cout << "cut off day exceeded. cutOffDay: " << cutOffDay << endl;
+
+    }
+
+    return withinTimeFrame;
 }
 
 
