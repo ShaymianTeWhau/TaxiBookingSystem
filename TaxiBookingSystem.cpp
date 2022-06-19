@@ -122,7 +122,7 @@ struct lostPropertyClaim {
 void registerNewLogin();
 void login();
 vector<Customer> readCustomerFile(); 
-vector<Driver> readDriversFile(); //update
+vector<Driver> readDriversFile();
 vector<Admin> readAdminsFile();
 void displayAllCostomers(vector<Customer>customerList);
 void displayAllDrivers(vector<Driver>driversList);
@@ -302,7 +302,9 @@ void login() {
             }
         }
 
-        if (foundUsernamePasswordMatch != true) cout << "Incorrect username or password, try again (or enter 'e' to exit)" << endl;
+        if (foundUsernamePasswordMatch != true) 
+            cout << "Incorrect username or password, try again" << 
+            "\nif you have forgotten your password please call us at 0800 468 456 816 (or enter 'e' to exit)" << endl;
     }
 
     cout << "correct name and password" << endl;
@@ -607,11 +609,48 @@ void contactMenu(Customer user) {
 
 void displayUserProfile(Customer c) { 
     pageBreak();
+    vector<Customer> customers = readCustomerFile();
+    // find matching customer in vector
+    int thisCustomer = 0;
+    for (int i = 0; i < customers.size(); i++) {
+        if (customers.at(i).email == c.email)
+            thisCustomer = i;
+    }
+
     cout << "User profile" << endl;
-    cout << "Email: " << c.email << endl;
-    cout << "Name: " << c.firstName << " " << c.lastName << endl;
-    cout << "Ph number: " << c.phoneNumber << endl;
+    cout << "Email: " << customers.at(thisCustomer).email << endl;
+    cout << "Name: " << customers.at(thisCustomer).firstName << " " << customers.at(thisCustomer).lastName << endl;
+    cout << "Ph number: " << customers.at(thisCustomer).phoneNumber << endl;
     cout << endl;
+    cout << "*note: email cannot be changed. If you need to change email you must make a new account" << endl;
+    cout << "\nWould you like to update this information? (Y/N): ";
+
+    bool keepRunning = true;
+    while (keepRunning) {
+
+        string userInput;
+        getline(cin, userInput);
+        if (userInput == "Y" or userInput == "y") {
+
+            // promt user to update customer details
+            //cout << "cutomer at i: " << thisCustomer << ": " << customers.at(thisCustomer).email << endl;
+            cout << "Update Information for " << customers.at(thisCustomer).firstName << " " << customers.at(thisCustomer).lastName << endl << endl;
+            cout << "Enter first name: ";
+            getline(cin, customers.at(thisCustomer).firstName);
+            cout << "Enter last name: ";
+            getline(cin, customers.at(thisCustomer).lastName);
+            cout << "Enter ph number: ";
+            getline(cin, customers.at(thisCustomer).phoneNumber);
+            updateCustomersFile(customers);
+            keepRunning = false;
+        }
+        else if (userInput == "N" || userInput == "n" || userInput == "e") {
+            keepRunning = false;
+        }
+        else {
+            cout << "Invalid Input (Y/N)" << endl;
+        }
+    }
 }
 
 void pageBreak() {
