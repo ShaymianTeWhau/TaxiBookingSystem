@@ -506,7 +506,7 @@ void customerMenu(Customer user) {
 
         cout << "\nUser Options" << endl;
         cout << "********" << endl;
-        cout << "1. View/Book Rides" << endl;
+        cout << "1. Book a ride" << endl;
         cout << "2. View/Edit User Info" << endl;
         cout << "3. View Transactions" << endl;
         cout << "4. Contact Administration" << endl;
