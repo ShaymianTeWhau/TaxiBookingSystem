@@ -155,16 +155,21 @@ vector<vector<string>> readSchedule(string filename);
 vector<vector<string>> addNewDriversToSchedule(vector<vector<string>> schedule);
 bool hasDatePassed(string date);
 bool isDateWithinTimeFrame(string date, int timeFrame);
+void displayThisCustomersTransactions(Customer user);
+
+// to do:     replace(myString.begin(), myString.end(), ',', ' ');
+
 
 int main() //start menu
 {
+    pageBreak();
+    cout << "== Taxi services Wellington ==" << endl;
+    cout << "******************************" << endl;
+
     string userInput, userSelect, userSupport{};
     bool keepRunning{ true };
-    pageBreak();
     while (keepRunning) {
         //start menu
-        cout << "\nTaxi App" << endl;
-        cout << "********" << endl;
         cout << "1. Register" << endl;
         cout << "2. Login" << endl;
         cout << "3. Exit" << endl;
@@ -521,7 +526,7 @@ void customerMenu(Customer user) {
             displayUserProfile(user);
         }
         else if (userSelect == "3") {
-            // userTransactions();
+            displayThisCustomersTransactions(user);
 
         }
         else if (userSelect == "4") {
@@ -567,7 +572,8 @@ void contactMenu(Customer user) {
     cout << "1. General Enquiries" << endl;
     cout << "2. Complaints" << endl;
     cout << "3. Lost Property" << endl;
-    cout << "4. Return to main menu" << endl;
+    cout << "4. View company Contact details" << endl;
+    cout << "5. Return to main menu" << endl;
 
     getline(cin, userInput);
 
@@ -598,6 +604,16 @@ void contactMenu(Customer user) {
 
     }
     else if (userInput == "4") {
+        pageBreak();
+        cout << "== Taxi services Wellington ==" << endl;
+        cout << "50 Centre st, Wellington" << endl;
+        cout << "Ph: 0800 123 456 7890" << endl << endl;
+        cout << "press enter to continue...";
+        string contin;
+        getline(cin, contin);
+
+    }
+    else if (userInput == "5") {
         //customerMenu();
         return;
     }
@@ -1078,9 +1094,10 @@ vector<Booking> readBookingsFile() {
 
 void displayAllBookings(vector<Booking> bookings) {
     // displays al Bookings from a vector
-    cout << "\nDisplay all bookings" << endl;
+    //cout << "\nDisplay all bookings" << endl;
     for (auto b : bookings) {
-        cout << b.bookingRef << ", " << b.customer.email << ", " << b.driver.email << ", " << b.date << ", " << b.time << ", " << b.duration << ", " << b.startLocation << ", " << b.endLocation << ", $" << b.cost << endl;
+        cout << b.bookingRef << ", " << b.customer.firstName << " " << b.customer.lastName << ", Driver: " << b.driver.firstName << endl;
+        cout << b.date << ", " << b.time << ", " << b.duration << ", " << b.startLocation << ", " << b.endLocation << ", $" << b.cost << endl << endl; 
     }
 }
 
@@ -1391,7 +1408,6 @@ vector<vector<string>> addNewDriversToSchedule(vector<vector<string>> schedule) 
     return schedule;
 }
 
-
 bool hasDatePassed(string date) {
     //cout << "========================================\n\thasDatePassed function called...\n" << endl;
     bool dateHasPassed = false;
@@ -1531,4 +1547,143 @@ bool isDateWithinTimeFrame(string date, int timeFrame) {
     return withinTimeFrame;
 }
 
+void displayThisCustomersTransactions(Customer user) {
+    vector<Booking> bookings = readBookingsFile();
+    vector<Booking> userBookingsPast;
+    vector<Booking> userBookingsFuture;
 
+    for (int i = 0; i < bookings.size(); i++) {
+        if (bookings.at(i).customer.email == user.email) {
+            // if past or else future
+            if (hasDatePassed(bookings.at(i).date) == false && bookings.at(i).startLocation != "CANCELLED") {
+                userBookingsFuture.push_back(bookings.at(i));
+            }
+            else {
+                userBookingsPast.push_back(bookings.at(i));
+            }
+        }
+    }
+
+    //display bookings only with this person's email
+    cout << "\nYour Transactions" << endl;
+    cout << "**********" << endl;
+    cout << "\n";
+
+    // display past rides
+
+    // display future rides
+    if (userBookingsPast.size() == 0) {
+        cout << "No past bookings to show" << endl;
+    }
+    else {
+        cout << "Past transactions\n" << endl;
+        displayAllBookings(userBookingsPast);
+
+    }
+    if (userBookingsFuture.size() == 0) {
+        cout << "No future bookings to show" << endl;
+        cout << "press enter to continue...";
+        string contin;
+        getline(cin, contin);
+        return;
+    }
+    else {
+        cout << "\nFuture transactions\n" << endl;
+        displayAllBookings(userBookingsFuture);
+    }
+
+    string userInput;
+    bool keepRunning = true;
+    while (keepRunning) {
+        cout << "Would you like to delete an upcoming booking? (Y/N): ";
+        getline(cin, userInput);
+
+        if (userInput == "Y" || userInput == "y") {
+            keepRunning = false;
+        }
+        else if (userInput == "N" || userInput == "n" || userInput == "E" || userInput == "e") {
+            return;
+        }
+        else {
+            cout << "Invalid input (Y/N):";
+        }
+    }
+    // display future bookings again with a list number
+
+    for (int i = 0; i < userBookingsFuture.size(); i++) {
+        cout << i + 1 << ". Reference: " << userBookingsFuture.at(i).bookingRef << "  Date: " << userBookingsFuture.at(i).date << "  Time: " << userBookingsFuture.at(i).time;
+        cout << "  Pickup: " << userBookingsFuture.at(i).startLocation << "  Dropoff: " << userBookingsFuture.at(i).endLocation << endl;
+    }
+
+    int numUserInput = 0;
+    keepRunning = true;
+    while (keepRunning) {
+        // promt user to choose a list number
+        cout << "Enter which booking you would like to cancel (enter by list number): ";
+        getline(cin, userInput);
+
+        // 
+        if(isdigit(userInput[0])) {
+            istringstream ssUserInput(userInput);
+            ssUserInput >> numUserInput;
+            if (numUserInput <= userBookingsFuture.size() && numUserInput > 0) {
+                keepRunning = false;
+            }
+        }
+        else {
+            cout << "Invalid input: " << endl;
+        }
+    }
+
+    // find ref to be cancelled
+    keepRunning = true;
+    while(keepRunning) {
+        cout << "Are you shure you want to cancel booking reference (Y/N): " << userBookingsFuture.at(numUserInput - 1).bookingRef << "? ";
+        getline(cin, userInput);
+
+        if (userInput == "Y" || userInput == "y") {
+            keepRunning = false;
+        }
+        else if (userInput == "N" || userInput == "n" || userInput == "E" || userInput == "e") {
+            return;
+        }
+        else {
+            cout << "Invalid Input" << endl;
+        }
+    }
+    // dont delete booking, keep ref number and replace all information with "CANCELLED"
+    // find ref number in bookings
+    string cancelDate;
+    for (int i = 0; i < bookings.size(); i++) {
+        if (bookings.at(i).bookingRef == userBookingsFuture.at(numUserInput - 1).bookingRef) {
+            bookings.at(i).cost = 0.0;
+            bookings.at(i).duration = 0;
+            bookings.at(i).startLocation = "CANCELLED";
+            bookings.at(i).endLocation = "CANCELLED";
+            cancelDate = bookings.at(i).date;
+        }
+    }
+
+    // updateBookings
+    updateBookingsFile(bookings);
+
+    // upDateSchedule to driver being available
+
+    string directory = "schedule/";
+    string extension = ".csv";
+    string filename = directory + cancelDate + extension;
+
+    vector<vector<string>> schedule = readSchedule(filename);
+
+    // loop through to replace all ref numbers with "available"
+    for (int i = 0; i < schedule.size(); i++) {
+        for (int j = 0; j < schedule.at(i).size(); j++) {
+            if (schedule.at(i).at(j) == userBookingsFuture.at(numUserInput - 1).bookingRef) {
+                schedule.at(i).at(j) = "available";
+            }
+        }
+    }
+    updateSchedule(schedule, filename);
+    cout << "Booking cancelled" << endl;
+
+}
