@@ -67,8 +67,6 @@ struct Admin {
     }
 };
 
-//struct Booking
-
 struct Booking {
     string bookingRef;
     Customer customer;
@@ -114,9 +112,15 @@ struct lostPropertyClaim {
     }
 };
 
-//struct Complaint
+struct complaintOrEnquiry {
+    string enquiryType;
+    string note;
 
-//struct Enquiry
+    //constructor
+    complaintOrEnquiry(string n = "") {
+        note = n;
+    }
+};
 
 //prototypes
 void registerNewLogin();
@@ -135,8 +139,12 @@ void adminMenu(Admin user);
 void pageBreak();
 void submitLostProperty();
 vector<lostProperty> readLostPropertyFile();
+vector<lostPropertyClaim> readLostPropertyClaimsFile();
+void displayAllLostPropertyClaims(vector<lostPropertyClaim> claims);
 void updateLostPropertyFile(vector<lostProperty> lostPropertyList);
 void displayAllLostProperty();
+void claimLostProperty(Customer user);
+void updateLostPropertyClaimsFile(vector<lostPropertyClaim> claims);
 void contactMenu(Customer user);
 void displayUserProfile(Customer c);
 void makeBooking(Customer user);
@@ -156,6 +164,10 @@ vector<vector<string>> addNewDriversToSchedule(vector<vector<string>> schedule);
 bool hasDatePassed(string date);
 bool isDateWithinTimeFrame(string date, int timeFrame);
 void displayThisCustomersTransactions(Customer user);
+void makeComplaintOrEnquiry(string enquiryType);
+vector<complaintOrEnquiry> readEnquiriesFile();
+void updateEnquiriesFile(vector<complaintOrEnquiry> enquiries);
+void displayEnquiries(vector<complaintOrEnquiry> enquiries);
 
 // to do:     replace(myString.begin(), myString.end(), ',', ' ');
 
@@ -513,7 +525,7 @@ void customerMenu(Customer user) {
         cout << "********" << endl;
         cout << "1. Book a ride" << endl;
         cout << "2. View/Edit User Info" << endl;
-        cout << "3. View Transactions" << endl;
+        cout << "3. View Transactions or cancel a booking" << endl;
         cout << "4. Contact Administration" << endl;
         cout << "5. Log Out" << endl;
 
@@ -578,29 +590,21 @@ void contactMenu(Customer user) {
     getline(cin, userInput);
 
     if (userInput == "1") {
-        cout << "General Enquiries";
-        cout << "\n-----------------------------\n";
-        cout << "Enter enquiry message below or press e to return:";
-        getline(cin, enquiryMessage);
-        if (enquiryMessage == "e") return; //if user types 'e' for exit, they will return to start menu
+        pageBreak();
+        cout << "General Enquiries" << endl;
+        cout << "*****************" << endl;
+        makeComplaintOrEnquiry("enquiry");
 
     }
     else if (userInput == "2") {
-        cout << "Complaints Form";
-        cout << "\n-----------------------------\n";
-        cout << "Enter Driver Name your complaint is about or press e to return:";
-        getline(cin, driverName); 
-        if (driverName == "e") return; //if user types 'e' for exit, they will return to start menu
-        cout << "Enter your complaint message below or press e to return:";
-        getline(cin, complaintMessage);
-        if (complaintMessage == "e") return; //if user types 'e' for exit, they will return to start menu
+        pageBreak();
+        cout << "Complaints" << endl;
+        cout << "**********" << endl;
+        makeComplaintOrEnquiry("complaint");
     }
     else if (userInput == "3") {
-        cout << "Lost Property Claims";
-        cout << "\n-----------------------------\n";
-        cout << "Enter item description below or press e to return:";
-        getline(cin, itemDesc);
-        if (itemDesc == "e") return; //if user types 'e' for exit, they will return to start menu
+        
+        claimLostProperty(user);
 
     }
     else if (userInput == "4") {
@@ -717,6 +721,48 @@ vector<lostProperty> readLostPropertyFile() {
     return lostPropertyList;
 }
 
+vector<lostPropertyClaim> readLostPropertyClaimsFile() {
+    //this function will read lostPropertyClaims.csv and return vector
+    vector<lostPropertyClaim> lostPropertyClaimsList;
+    vector<Customer> customers = readCustomerFile();
+
+    fstream lostPropertyClaimsFile;
+    lostPropertyClaim tempLostPropertyClaim;
+    lostPropertyClaimsFile.open("lostPropertyClaims.csv", ios::in);
+    if (lostPropertyClaimsFile.is_open()) {
+        string line;
+        string cell;
+        Customer tempCustomer;
+        while (getline(lostPropertyClaimsFile, line)) {
+            istringstream linestream(line);
+
+            getline(linestream, cell, ',');
+            tempLostPropertyClaim.description = cell;
+
+            getline(linestream, cell, ',');
+            for (int i = 0; i < customers.size(); i++) {
+                if (cell == customers.at(i).email) {
+                    tempCustomer = customers.at(i);
+                }
+            }
+
+            tempLostPropertyClaim.reportedBy = tempCustomer;
+
+            lostPropertyClaimsList.push_back(tempLostPropertyClaim);
+        }
+        lostPropertyClaimsFile.close();
+    }
+    return lostPropertyClaimsList;
+}
+
+void displayAllLostPropertyClaims(vector<lostPropertyClaim> claims) {
+    for (auto c : claims) {
+        cout << c.description << endl;
+        cout << "Claim by " << c.reportedBy.firstName << " " << c.reportedBy.lastName << endl;
+        cout << c.reportedBy.email << "\t" << c.reportedBy.phoneNumber << endl << endl;
+    }
+}
+
 void updateLostPropertyFile(vector<lostProperty> lostPropertyList) {
     //this function updates the lostProperty.csv with the latest information
     fstream lostPropertyFile;
@@ -739,8 +785,35 @@ void displayAllLostProperty() {
     }
 }
 
-//void claimLostProperty
+void claimLostProperty(Customer user) {
+    pageBreak();
 
+    vector<lostPropertyClaim> lostPropertyClaims = readLostPropertyClaimsFile();
+    lostPropertyClaim newLostPropertyClaim;
+
+    cout << "Lost property claims" << endl;
+    cout << "********************" << endl << endl;
+    cout << "Enter a description of the item you lost: ";
+    getline(cin, newLostPropertyClaim.description);
+    newLostPropertyClaim.reportedBy = user;
+
+    lostPropertyClaims.push_back(newLostPropertyClaim);
+
+    updateLostPropertyClaimsFile(lostPropertyClaims);
+    cout << "Thankyou. We will contact you if we find anything :)" << endl;
+}
+
+void updateLostPropertyClaimsFile(vector<lostPropertyClaim> claims) {
+    //this function updates the lostProperty.csv with the latest information
+    fstream lostPropertyClaimsFile;
+    lostPropertyClaimsFile.open("lostPropertyClaims.csv", ios::out);
+    if (lostPropertyClaimsFile.is_open()) {
+        for (int i = 0; i < claims.size(); i++) {
+            lostPropertyClaimsFile << claims[i].description << "," << claims[i].reportedBy.email << endl;
+        }
+        lostPropertyClaimsFile.close();
+    }
+}
 
 void makeBooking(Customer user) {
     pageBreak();
@@ -1686,4 +1759,89 @@ void displayThisCustomersTransactions(Customer user) {
     updateSchedule(schedule, filename);
     cout << "Booking cancelled" << endl;
 
+}
+
+void makeComplaintOrEnquiry(string enquiryType) {
+    if (enquiryType != "complaint" && enquiryType != "enquiry") {
+        cout << "enquiryType \"" << enquiryType << "\" not valid" << endl;
+        return;
+    }
+
+    vector<complaintOrEnquiry> enquiries = readEnquiriesFile();
+    complaintOrEnquiry newEnquiry;
+    string userInput;
+
+    newEnquiry.enquiryType = enquiryType;
+
+    if (enquiryType == "complaint") {
+        cout << "Enter message, if you need us to contact you please include your details in the message otherwise you will remain anonymous: " << endl;
+    }
+    else {
+        cout << "Enter name, or press enter to skip: ";
+        getline(cin, userInput);
+        newEnquiry.note += (userInput);
+        cout << "Enter ph number, or press enter to skip: ";
+        getline(cin, userInput);
+        newEnquiry.note += (" " + userInput);
+        cout << "Enter email, or press enter to skip: ";
+        getline(cin, userInput);
+        newEnquiry.note += (" " + userInput + " ");
+        cout << "Enter message: ";
+    }
+    getline(cin, userInput);
+
+    newEnquiry.note += userInput;
+
+    enquiries.push_back(newEnquiry);
+
+    updateEnquiriesFile(enquiries);
+
+    cout << "Message sent. Thankyou for choosing Taxi services Wellington" << endl;
+}
+
+vector<complaintOrEnquiry> readEnquiriesFile() {
+    //this function will read admin.csv and return vector
+    vector<complaintOrEnquiry> enquiries;
+    fstream enquiriesFile;
+    complaintOrEnquiry tempEnquiry;
+    enquiriesFile.open("enquiries.csv", ios::in);
+    if (enquiriesFile.is_open()) {
+        string line;
+        string cell;
+        while (getline(enquiriesFile, line)) {
+            istringstream linestream(line);
+
+            getline(linestream, cell, ',');
+            tempEnquiry.enquiryType = cell;
+
+            getline(linestream, cell, ',');
+            tempEnquiry.note = cell;
+
+            enquiries.push_back(tempEnquiry);
+        }
+        enquiriesFile.close();
+    }
+    return enquiries;
+}
+
+void updateEnquiriesFile(vector<complaintOrEnquiry> enquiries) {
+    //this function updates the enquiries.csv with the latest information
+    fstream enquiriesFile;
+    enquiriesFile.open("enquiries.csv", ios::out);
+    if (enquiriesFile.is_open()) {
+        for (int i = 0; i < enquiries.size(); i++) {
+            enquiriesFile << enquiries[i].enquiryType << "," << enquiries[i].note << endl;
+        }
+        enquiriesFile.close();
+    }
+}
+
+void displayEnquiries(vector<complaintOrEnquiry> enquiries) {
+
+    cout << endl;
+    for (auto e : enquiries) {
+        cout << e.enquiryType << endl;
+        cout << e.note << endl;
+        cout << endl;
+    }
 }
