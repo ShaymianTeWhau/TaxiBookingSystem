@@ -851,6 +851,8 @@ void makeBooking(Customer user) {
         // promt user
         cout << "Type a date to see availability (DD/MM/YY): ";
         getline(cin, userInputDate);
+        if (userInputDate == "E" || userInputDate == "e") return;
+
         // validate length
         if (userInputDate.length() == 8) {
 
