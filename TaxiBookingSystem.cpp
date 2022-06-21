@@ -168,6 +168,9 @@ void makeComplaintOrEnquiry(string enquiryType);
 vector<complaintOrEnquiry> readEnquiriesFile();
 void updateEnquiriesFile(vector<complaintOrEnquiry> enquiries);
 void displayEnquiries(vector<complaintOrEnquiry> enquiries);
+void DisplayThisDriversTransactions(Driver user);
+void displayThisDriversScheduleToday(Driver user);
+string getTodaysDateAsString();
 
 // to do:     replace(myString.begin(), myString.end(), ',', ' ');
 
@@ -558,7 +561,8 @@ void customerMenu(Customer user) {
 void driverMenu(Driver user) {
     cout << "Logged in as Driver" << endl;
     cout << "Welcome " << user.firstName << " " << user.lastName << endl;
-    
+    //DisplayThisDriversTransactions(user);
+    displayThisDriversScheduleToday(user);
 
 }
 
@@ -907,9 +911,6 @@ void makeBooking(Customer user) {
 
     } while (isDateValid == false);
 
-    //cout << "Date: " << userInputDate << " is valid"; return;                           // delete this line
-    
-    //cout << "Date: " << userInputDate << " is valid";  return; // delete this line
     
     string date = userInputDate;
 
@@ -1551,31 +1552,13 @@ bool isDateWithinTimeFrame(string date, int timeFrame) {
     ssYear >> year;
 
     // get todays date
-    struct tm newtime;
-    time_t now = time(0);
-    localtime_s(&newtime, &now);
 
-    // convert todays date to string (DD/MM/YY)
-    string nowDay = to_string(newtime.tm_mday);
-    if (nowDay.length() == 1) {
-        nowDay = "0" + nowDay;
-    }
-
-    string nowMonth = to_string(1 + newtime.tm_mon);
-    if (nowMonth.length() == 1) {
-        nowMonth = "0" + nowMonth;
-    }
-
-    string nowYear = to_string((-100) + newtime.tm_year);
-    if (nowYear.length() == 1) {
-        nowYear = "0" + nowYear;
-    }
-
-    string todaysDate = nowDay + "/" + nowMonth + "/" + nowYear;
+    
+    
     //cout << "Today: " << todaysDate << endl;
 
     // use incrementDate function in a loop?
-    string cutOffDate = todaysDate;
+    string cutOffDate = getTodaysDateAsString();
     for (int i = 0; i < timeFrame; i++) {
         cutOffDate = incrementDate(cutOffDate);
     }
@@ -1844,4 +1827,170 @@ void displayEnquiries(vector<complaintOrEnquiry> enquiries) {
         cout << e.note << endl;
         cout << endl;
     }
+}
+
+void DisplayThisDriversTransactions(Driver user) {
+    pageBreak();
+    vector<Booking> bookings = readBookingsFile();
+    vector<Booking> userBookingsPast;
+    vector<Booking> userBookingsFuture;
+
+    for (int i = 0; i < bookings.size(); i++) {
+        if (bookings.at(i).driver.email == user.email) {
+            // if past or else future
+            if (hasDatePassed(bookings.at(i).date) == false ) {
+                userBookingsFuture.push_back(bookings.at(i));
+            }
+            else {
+                userBookingsPast.push_back(bookings.at(i));
+            }
+        }
+    }
+
+    //display bookings only with this person's email
+    cout << "\nYour Transactions" << endl;
+    cout << "**********" << endl;
+    cout << "\n";
+
+    // display past rides
+
+    // display future rides
+    if (userBookingsPast.size() == 0) {
+        cout << "No past bookings to show" << endl;
+    }
+    else {
+        cout << "Past transactions\n" << endl;
+        displayAllBookings(userBookingsPast);
+
+    }
+    if (userBookingsFuture.size() == 0) {
+        cout << "No future bookings to show" << endl;
+        cout << "press enter to continue...";
+        string contin;
+        getline(cin, contin);
+        return;
+    }
+    else {
+        cout << "\nFuture transactions\n" << endl;
+        displayAllBookings(userBookingsFuture);
+    }
+}
+
+void displayThisDriversScheduleToday(Driver user) {
+    // get todays date
+    string date = getTodaysDateAsString();
+
+    // convert todays date
+    //cout << "Todays date: " << endl;
+    ////cout << "now: " << now << endl;
+    //cout << "day: " << newtime.tm_mday << endl;
+    //cout << "Month: " << 1 + newtime.tm_mon << endl;
+    //cout << "year: " << ( -100) + newtime.tm_year << endl;
+
+    // check if there is a chedule for todays date
+    replace(date.begin(), date.end(), '/', '-');
+
+    cout << "Today: " << date << endl;
+    
+
+
+
+    // converting date format ( DD/MM/YY ) to a schedule filename ( schedule/ DD-MM-YY.csv )
+    
+    vector <vector <string>> schedule = {
+        {},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},
+    };
+    vector<Booking> bookings = readBookingsFile();
+    vector<Customer> customers = readCustomerFile();
+    string directory = "schedule/";
+    string extension = ".csv";
+    string filename = directory + date + extension;             //look for availibilityfile, if there is no file, then make one before opening
+
+    // check for a schedule with this filename (schedule / DD - MM - YY.csv) 
+    // if no such schedule is found for this date then it will have to be created
+    checkForSchedule(filename);
+
+    // find schedule for this date and input to vector<string> availableTimes
+    schedule = readSchedule(filename);
+
+    // update availableTimes vector with any new drivers have been added
+    schedule = addNewDriversToSchedule(schedule);
+
+
+    // make a new vector with time(only show If Working), ref(or no booking), booking.start, booking.end, customer name, customer phone, customer email
+    vector<vector<string>> personalDriverSchedule;
+    vector<string> row;
+    string tempRef;
+    for (int i = 0; i < schedule.size(); i++) {
+        for (int j = 0; j < schedule.at(i).size(); j++) {
+            if (user.email == schedule.at(i).at(j)) {
+                if (schedule.at(i).at(j + 1) != "unstaffed") {
+                    row.clear();
+                    row.push_back(schedule.at(i).at(0));
+                    tempRef = "no booking";
+                    if (schedule.at(i).at(j + 1) != "available") {
+                        tempRef = schedule.at(i).at(j + 1);
+                    }
+                    row.push_back(tempRef);
+                    personalDriverSchedule.push_back(row);
+                }
+            }
+        }
+    }
+
+    // use ref number (personalDriverSchedule.at(i).at(1)) to find Booking and Customer, 
+    // use  booking.start, booking.end, customer name, customer phone, customer email
+    for (int i = 0; i < personalDriverSchedule.size(); i++) {
+        for (int j = 0; j < bookings.size(); j++) {
+            if (personalDriverSchedule.at(i).at(1) == bookings.at(j).bookingRef) {
+                personalDriverSchedule.at(i).push_back(bookings.at(j).startLocation);
+                personalDriverSchedule.at(i).push_back(bookings.at(j).endLocation);
+                personalDriverSchedule.at(i).push_back(bookings.at(j).customer.firstName);
+                personalDriverSchedule.at(i).push_back(bookings.at(j).customer.lastName);
+                personalDriverSchedule.at(i).push_back(bookings.at(j).customer.phoneNumber);
+                personalDriverSchedule.at(i).push_back(bookings.at(j).customer.email);                
+            }
+        }
+    }
+
+
+
+
+
+
+    // display personalDriverSchedule
+    for (int i = 0; i < personalDriverSchedule.size(); i++) {
+        for (int j = 0; j < personalDriverSchedule.at(i).size(); j++) {
+            cout << personalDriverSchedule.at(i).at(j) << ", ";
+        }cout << endl;
+    }
+
+    // promt driver to exit, or reject booking
+
+
+}
+
+string getTodaysDateAsString() {
+    struct tm newtime;
+    time_t now = time(0);
+    localtime_s(&newtime, &now);
+
+    // convert todays date to string (DD/MM/YY)
+    string nowDay = to_string(newtime.tm_mday);
+    if (nowDay.length() == 1) {
+        nowDay = "0" + nowDay;
+    }
+
+    string nowMonth = to_string(1 + newtime.tm_mon);
+    if (nowMonth.length() == 1) {
+        nowMonth = "0" + nowMonth;
+    }
+
+    string nowYear = to_string((-100) + newtime.tm_year);
+    if (nowYear.length() == 1) {
+        nowYear = "0" + nowYear;
+    }
+
+    string todaysDate = nowDay + "/" + nowMonth + "/" + nowYear;
+    return todaysDate;
 }
