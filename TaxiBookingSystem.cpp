@@ -562,7 +562,12 @@ void driverMenu(Driver user) {
     cout << "Logged in as Driver" << endl;
     cout << "Welcome " << user.firstName << " " << user.lastName << endl;
     //DisplayThisDriversTransactions(user);
-    displayThisDriversScheduleToday(user);
+    //displayThisDriversScheduleToday(user);
+    //submitLostProperty();
+
+
+
+
 
 }
 
@@ -1030,8 +1035,14 @@ void makeBooking(Customer user) {
         }
 
     }
-        // round new booking duration up to nearest 30mins
-    roundedUp = ((userInputDuration / 30) * 30) + 30;
+    // round new booking duration up to nearest 30mins
+    if (userInputDuration % 30 == 0) {
+        roundedUp = userInputDuration;
+    }
+    else {
+        roundedUp = ((userInputDuration / 30) * 30) + 30;
+    }
+
 
     newBooking.duration = roundedUp;
 
@@ -1890,7 +1901,7 @@ void displayThisDriversScheduleToday(Driver user) {
     // check if there is a chedule for todays date
     replace(date.begin(), date.end(), '/', '-');
 
-    cout << "Today: " << date << endl;
+    //cout << "Today: " << date << endl;
     
 
 
@@ -1953,21 +1964,21 @@ void displayThisDriversScheduleToday(Driver user) {
         }
     }
 
-
-
-
-
-
     // display personalDriverSchedule
+    pageBreak();
+    cout << "Todays trips" << endl;
+    cout << "************" << endl << endl;
+         
     for (int i = 0; i < personalDriverSchedule.size(); i++) {
         for (int j = 0; j < personalDriverSchedule.at(i).size(); j++) {
             cout << personalDriverSchedule.at(i).at(j) << ", ";
         }cout << endl;
     }
 
-    // promt driver to exit, or reject booking
-
-
+    // promt driver to exit, or reject booking // no actually only admin can do this
+    cout << "press enter to continue...\n";
+    string contin;
+    getline(cin, contin);
 }
 
 string getTodaysDateAsString() {
