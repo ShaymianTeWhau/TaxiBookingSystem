@@ -125,6 +125,7 @@ struct complaintOrEnquiry {
 //prototypes
 void registerNewLogin();
 void registerNewDriver();
+void registerNewAdmin();
 void login();
 vector<Customer> readCustomerFile(); 
 vector<Driver> readDriversFile();
@@ -133,6 +134,7 @@ void displayAllCostomers(vector<Customer>customerList);
 void displayAllDrivers(vector<Driver>driversList);
 void displayAllAdmin(vector<Admin>adminList);
 void updateCustomersFile(vector<Customer> customers);
+void updateAdminFile(vector<Admin> admin);
 void updateDriversFile(vector<Driver> drivers);
 string createAndCheckPassword();
 void customerMenu(Customer user);
@@ -149,6 +151,7 @@ void claimLostProperty(Customer user);
 void updateLostPropertyClaimsFile(vector<lostPropertyClaim> claims);
 void contactMenu(Customer user);
 void displayUserProfile(Customer c);
+void displayAdminProfile(Admin a);
 void  displayDriverProfile(Driver user);
 void makeBooking(Customer user);
 vector<Booking> readBookingsFile();
@@ -176,6 +179,7 @@ void DisplayThisDriversTransactions(Driver user);
 void displayThisDriversScheduleToday(Driver user);
 string getTodaysDateAsString();
 Customer chooseCustomer(vector<Customer> customers);
+Admin chooseAdmin(vector<Admin> admin);
 Driver chooseDriver(vector<Driver> drivers);
 void displayFullSchedule(string date);
 string promtForDate();
@@ -217,6 +221,7 @@ int main() //start menu
         else {
             cout << "Invalid Input" << endl;
         }
+        pageBreak();
     }
 
     return 0;
@@ -420,6 +425,65 @@ void registerNewDriver() {
 
     //update drivers.csv
     updateDriversFile(driversList);
+}
+
+void registerNewAdmin() {
+
+    //read customers.csv and put in vector
+    vector<Admin> adminList = readAdminsFile();
+
+    //add new customer to customerList
+    Admin newAdmin;
+    string unverifiedEmail;
+    bool containsAddressSign{ false };
+
+    //promt user to enter email
+    while (containsAddressSign == false) {
+        cout << "\nEnter email (This will be your username): " << endl;
+        cout << "(note: type 'e' to cancel and exit)" << endl;
+        getline(cin, unverifiedEmail);
+
+        if (unverifiedEmail == "e") return; //if user types 'e' for exit, they will return to start menu
+
+        //make sure email has '@' symbol and a '.' symbol 
+        if (unverifiedEmail.find('@') != string::npos && unverifiedEmail.find('.') != string::npos) {
+            containsAddressSign = true;
+        }
+        else cout << "Invalid email, example: johnappleseed@email.com" << endl;
+    }
+
+    //verify that email is not a conflict
+    for (auto a : adminList) {
+        if (a.email == unverifiedEmail) {
+            cout << "Email address already exists. Go to login menu." << endl;
+            return;
+        }
+    }
+
+    //get new customer details
+    newAdmin.email = unverifiedEmail;
+    cout << "Enter first name: ";
+    getline(cin, newAdmin.firstName);
+    if (newAdmin.firstName == "e") return; //if user types 'e' for exit, they will return to start menu
+
+    cout << "Enter last name: ";
+    getline(cin, newAdmin.lastName);
+    if (newAdmin.lastName == "e") return; //if user types 'e' for exit, they will return to start menu
+
+    cout << "Enter phone number: ";
+    getline(cin, newAdmin.phoneNumber);
+    if (newAdmin.phoneNumber == "e") return; //if user types 'e' for exit, they will return to start menu
+
+    //check password    
+
+    newAdmin.password = createAndCheckPassword();
+    adminList.push_back(newAdmin);
+
+    
+
+    //update customers.csv
+    updateAdminFile(adminList);
+    cout << "New admin created" << endl;
 }
 
 void login() {
@@ -666,6 +730,18 @@ void updateCustomersFile(vector<Customer> customers) {
     }
 }
 
+void updateAdminFile(vector<Admin> admin) {
+    fstream adminFile;
+    adminFile.open("admin.csv", ios::out);
+    if (adminFile.is_open()) {
+        for (int i = 0; i < admin.size(); i++) {
+            adminFile << admin[i].email << "," << admin[i].firstName << ","
+                << admin[i].lastName << "," << admin[i].phoneNumber << "," << admin[i].password << endl;
+        }
+        adminFile.close();
+    }
+}
+
 void updateDriversFile(vector<Driver> drivers) {
     fstream driversFile;
     driversFile.open("drivers.csv", ios::out);
@@ -823,7 +899,10 @@ void adminMenu(Admin user) {
         cout << "12. View lost property" << endl;
         cout << "13. Add lost property" << endl;
         cout << "14. View lost property claims" << endl;
-        cout << "15. Log out" << endl;
+        cout << "15. View admin" << endl;
+        cout << "16. Add admin" << endl;
+        cout << "17. Edit admin" << endl;
+        cout << "18. Log out" << endl;
         cout << "Enter option: ";
         string userInput;
         getline(cin, userInput);
@@ -913,9 +992,34 @@ void adminMenu(Admin user) {
             displayAllLostPropertyClaims(claims);
             break;
         case 15:
-            //log out
+            //View admin
+            pageBreak();
+            cout << "All admin" << endl;
+            cout << "*********" << endl;
+            displayAllAdmin(admin);
+            break;
+        case 16:
+            //Add admin
+            //add driver
+            cout << "Register new admin" << endl;
+            cout << "******************" << endl;
+            registerNewAdmin();
+            break;
+        case 17:
+            //Edit admin
+            pageBreak();
+            cout << "Edit admin" << endl;
+            cout << "**********" << endl;
+            //choose admin
+            editAdmin = chooseAdmin(admin);
+            //display admin and give options to edit
+            displayAdminProfile(editAdmin);
+            break;
+        case 18:
+            //Log out
             keepRunning = false;
             break;
+
         default:
             cout << "Invalid input" << endl;
             break;
@@ -1019,6 +1123,52 @@ void displayUserProfile(Customer c) {
             cout << "Enter ph number: ";
             getline(cin, customers.at(thisCustomer).phoneNumber);
             updateCustomersFile(customers);
+            keepRunning = false;
+        }
+        else if (userInput == "N" || userInput == "n" || userInput == "e") {
+            keepRunning = false;
+        }
+        else {
+            cout << "Invalid Input (Y/N)" << endl;
+        }
+    }
+}
+
+void displayAdminProfile(Admin a) {
+    pageBreak();
+    vector<Admin> admin = readAdminsFile();
+    // find matching customer in vector
+    int thisAdmin = 0;
+    for (int i = 0; i < admin.size(); i++) {
+        if (admin.at(i).email == a.email)
+            thisAdmin = i;
+    }
+
+    cout << "User profile" << endl;
+    cout << "Email: " << admin.at(thisAdmin).email << endl;
+    cout << "Name: " << admin.at(thisAdmin).firstName << " " << admin.at(thisAdmin).lastName << endl;
+    cout << "Ph number: " << admin.at(thisAdmin).phoneNumber << endl;
+    cout << endl;
+    cout << "*note: email cannot be changed. If you need to change email you must make a new account" << endl;
+    cout << "\nWould you like to update this information? (Y/N): ";
+
+    bool keepRunning = true;
+    while (keepRunning) {
+
+        string userInput;
+        getline(cin, userInput);
+        if (userInput == "Y" or userInput == "y") {
+
+            // promt user to update customer details
+            //cout << "cutomer at i: " << thisCustomer << ": " << customers.at(thisCustomer).email << endl;
+            cout << "Update Information for " << admin.at(thisAdmin).firstName << " " << admin.at(thisAdmin).lastName << endl << endl;
+            cout << "Enter first name: ";
+            getline(cin, admin.at(thisAdmin).firstName);
+            cout << "Enter last name: ";
+            getline(cin, admin.at(thisAdmin).lastName);
+            cout << "Enter ph number: ";
+            getline(cin, admin.at(thisAdmin).phoneNumber);
+            updateAdminFile(admin);
             keepRunning = false;
         }
         else if (userInput == "N" || userInput == "n" || userInput == "e") {
@@ -2724,6 +2874,36 @@ Customer chooseCustomer(vector<Customer> customers) {
 
     return ChosenCustomer;
 }
+
+Admin chooseAdmin(vector<Admin> admin) {
+    Admin chosenAdmin;
+
+    cout << "All admin" << endl;
+    for (int i = 0; i < admin.size(); i++) {
+        cout << i + 1 << ". " << admin.at(i).firstName << " " << admin.at(i).lastName << ", email: " << admin.at(i).email << endl;
+
+    }
+    string userInput;
+    int numUserInput = 0;
+    bool isValidInput = false;
+    while (isValidInput == false) {
+        cout << "\nChoose admin you would like to edit by list number: ";
+
+        getline(cin, userInput);
+        istringstream ssUserInput(userInput);
+
+        if (isdigit(userInput[0])) {
+            ssUserInput >> numUserInput;
+            if (numUserInput > 0 && numUserInput < admin.size() + 1)
+                isValidInput = true;
+        }
+    }
+
+    chosenAdmin = admin.at(numUserInput - 1);
+
+    return chosenAdmin;
+}
+
 
 Driver chooseDriver(vector<Driver> drivers) {
     Driver ChosenDriver;
