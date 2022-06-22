@@ -784,7 +784,7 @@ void updateDriversFile(vector<Driver> drivers) {
     }
 
     fstream driversFile;
-    driversFile.open("driverstest.csv", ios::out);
+    driversFile.open("drivers.csv", ios::out);
     if (driversFile.is_open()) {
         for (int i = 0; i < drivers.size(); i++) {
             driversFile << drivers[i].email << "," << drivers[i].firstName << ","
@@ -1412,6 +1412,13 @@ void displayAllLostPropertyClaims(vector<lostPropertyClaim> claims) {
 
 void updateLostPropertyFile(vector<lostProperty> lostPropertyList) {
     //this function updates the lostProperty.csv with the latest information
+    //remove commas
+    for (int i = 0; i < lostPropertyList.size(); i++) {
+        lostPropertyList.at(i).description.erase(remove(lostPropertyList.at(i).description.begin(), lostPropertyList.at(i).description.end(), ','), lostPropertyList.at(i).description.end());
+        lostPropertyList.at(i).submittedBy.erase(remove(lostPropertyList.at(i).submittedBy.begin(), lostPropertyList.at(i).submittedBy.end(), ','), lostPropertyList.at(i).submittedBy.end());
+    }
+
+
     fstream lostPropertyFile;
     lostPropertyFile.open("lostProperty.csv", ios::out);
     if (lostPropertyFile.is_open()) {
