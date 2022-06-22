@@ -185,7 +185,7 @@ void displayFullSchedule(string date);
 string promtForDate();
 
 
-// to do:     replace(myString.begin(), myString.end(), ',', ' ');
+// to do:      input.erase(remove(input.begin(), input.end(), ','), input.end());
 
 
 int main() //start menu
@@ -202,6 +202,7 @@ int main() //start menu
         cout << "2. Login" << endl;
         cout << "3. Exit" << endl;
 
+        //get user submenu choice
         getline(cin, userInput);
 
         if (userInput == "1" || userInput == "r") {
@@ -271,9 +272,11 @@ void registerNewLogin() {
     getline(cin, newCustomer.lastName);
     if (newCustomer.lastName == "e") return; //if user types 'e' for exit, they will return to start menu
 
+
     cout << "Enter phone number: ";
     getline(cin, newCustomer.phoneNumber);
     if (newCustomer.phoneNumber == "e") return; //if user types 'e' for exit, they will return to start menu
+
 
     //check password    
 
@@ -302,6 +305,7 @@ void registerNewDriver() {
         cout << "(note: type 'e' to cancel and exit)" << endl;
         getline(cin, unverifiedEmail);
 
+
         if (unverifiedEmail == "e") return; //if user types 'e' for exit, they will return to start menu
 
         //make sure email has '@' symbol and a '.' symbol 
@@ -327,21 +331,26 @@ void registerNewDriver() {
     getline(cin, newDriver.firstName);
     if (newDriver.firstName == "e") return; //if user types 'e' for exit, they will return to start menu
 
+
     cout << "Enter last name: ";
     getline(cin, newDriver.lastName);
     if (newDriver.lastName == "e") return; //if user types 'e' for exit, they will return to start menu
+
 
     cout << "Enter phone number: ";
     getline(cin, newDriver.phoneNumber);
     if (newDriver.phoneNumber == "e") return; //if user types 'e' for exit, they will return to start menu
 
+
     cout << "Enter drivers liscence number: ";
     getline(cin, newDriver.licence);
     if (newDriver.licence == "e") return; //if user types 'e' for exit, they will return to start menu
 
+
     cout << "Enter taxi registration number: ";
     getline(cin, newDriver.registration);
     if (newDriver.registration == "e") return; //if user types 'e' for exit, they will return to start menu
+
 
     cout << "\nYour almost there... Input work hours for new driver" << endl;
     cout << "Note: Times must be entered in 24hr time, 0.00 to 23.30" << endl;
@@ -719,6 +728,17 @@ void displayAllAdmin(vector<Admin>adminList) {
 };
 
 void updateCustomersFile(vector<Customer> customers) {
+    //remove commas
+    for (int i = 0; i < customers.size(); i++) {
+        customers.at(i).email.erase(remove(customers.at(i).email.begin(), customers.at(i).email.end(), ','), customers.at(i).email.end());
+        customers.at(i).firstName.erase(remove(customers.at(i).firstName.begin(), customers.at(i).firstName.end(), ','), customers.at(i).firstName.end());
+        customers.at(i).lastName.erase(remove(customers.at(i).lastName.begin(), customers.at(i).lastName.end(), ','), customers.at(i).lastName.end());
+        customers.at(i).password.erase(remove(customers.at(i).password.begin(), customers.at(i).password.end(), ','), customers.at(i).password.end());
+        customers.at(i).phoneNumber.erase(remove(customers.at(i).phoneNumber.begin(), customers.at(i).phoneNumber.end(), ','), customers.at(i).phoneNumber.end());
+    }
+
+    //newDriver.lastName.erase(remove(newDriver.lastName.begin(), newDriver.lastName.end(), ','), newDriver.lastName.end());
+
     fstream customersFile;
     customersFile.open("customers.csv", ios::out);
     if (customersFile.is_open()) {
@@ -731,6 +751,15 @@ void updateCustomersFile(vector<Customer> customers) {
 }
 
 void updateAdminFile(vector<Admin> admin) {
+    //remove commas
+    for (int i = 0; i < admin.size(); i++) {
+        admin.at(i).email.erase(remove(admin.at(i).email.begin(), admin.at(i).email.end(), ','), admin.at(i).email.end());
+        admin.at(i).firstName.erase(remove(admin.at(i).firstName.begin(), admin.at(i).firstName.end(), ','), admin.at(i).firstName.end());
+        admin.at(i).lastName.erase(remove(admin.at(i).lastName.begin(), admin.at(i).lastName.end(), ','), admin.at(i).lastName.end());
+        admin.at(i).password.erase(remove(admin.at(i).password.begin(), admin.at(i).password.end(), ','), admin.at(i).password.end());
+        admin.at(i).phoneNumber.erase(remove(admin.at(i).phoneNumber.begin(), admin.at(i).phoneNumber.end(), ','), admin.at(i).phoneNumber.end());
+    }
+
     fstream adminFile;
     adminFile.open("admin.csv", ios::out);
     if (adminFile.is_open()) {
@@ -743,8 +772,19 @@ void updateAdminFile(vector<Admin> admin) {
 }
 
 void updateDriversFile(vector<Driver> drivers) {
+    //remove commas
+    for (int i = 0; i < drivers.size(); i++) {
+        drivers.at(i).email.erase(remove(drivers.at(i).email.begin(), drivers.at(i).email.end(), ','), drivers.at(i).email.end());
+        drivers.at(i).firstName.erase(remove(drivers.at(i).firstName.begin(), drivers.at(i).firstName.end(), ','), drivers.at(i).firstName.end());
+        drivers.at(i).lastName.erase(remove(drivers.at(i).lastName.begin(), drivers.at(i).lastName.end(), ','), drivers.at(i).lastName.end());
+        drivers.at(i).password.erase(remove(drivers.at(i).password.begin(), drivers.at(i).password.end(), ','), drivers.at(i).password.end());
+        drivers.at(i).phoneNumber.erase(remove(drivers.at(i).phoneNumber.begin(), drivers.at(i).phoneNumber.end(), ','), drivers.at(i).phoneNumber.end());
+        drivers.at(i).licence.erase(remove(drivers.at(i).licence.begin(), drivers.at(i).licence.end(), ','), drivers.at(i).licence.end());
+        drivers.at(i).registration.erase(remove(drivers.at(i).registration.begin(), drivers.at(i).registration.end(), ','), drivers.at(i).registration.end());
+    }
+
     fstream driversFile;
-    driversFile.open("drivers.csv", ios::out);
+    driversFile.open("driverstest.csv", ios::out);
     if (driversFile.is_open()) {
         for (int i = 0; i < drivers.size(); i++) {
             driversFile << drivers[i].email << "," << drivers[i].firstName << ","
@@ -1463,6 +1503,12 @@ void claimLostProperty(Customer user) {
 
 void updateLostPropertyClaimsFile(vector<lostPropertyClaim> claims) {
     //this function updates the lostProperty.csv with the latest information
+
+    for (int i = 0; i < claims.size(); i++) {
+        claims.at(i).description.erase(remove(claims.at(i).description.begin(), claims.at(i).description.end(), ','), claims.at(i).description.end());
+        
+    }
+
     fstream lostPropertyClaimsFile;
     lostPropertyClaimsFile.open("lostPropertyClaims.csv", ios::out);
     if (lostPropertyClaimsFile.is_open()) {
@@ -1862,6 +1908,11 @@ Customer getCustomerByEmail(string email) {
 }
 
 void updateBookingsFile(vector<Booking> bookings) {
+    for (int i = 0; i < bookings.size(); i++) {
+        bookings.at(i).startLocation.erase(remove(bookings.at(i).startLocation.begin(), bookings.at(i).startLocation.end(), ','), bookings.at(i).startLocation.end());
+        bookings.at(i).endLocation.erase(remove(bookings.at(i).endLocation.begin(), bookings.at(i).endLocation.end(), ','), bookings.at(i).endLocation.end());
+    }
+
     fstream bookingsFile;
     bookingsFile.open("bookings.csv", ios::out);
     if (bookingsFile.is_open()) {
@@ -1874,6 +1925,7 @@ void updateBookingsFile(vector<Booking> bookings) {
 }
 
 void updateSchedule(vector<vector<string>> availableTimes, string filename) {
+
     fstream scheduleFile;
     scheduleFile.open(filename, ios::out);
     if (scheduleFile.is_open()) {
@@ -2611,6 +2663,11 @@ vector<complaintOrEnquiry> readEnquiriesFile() {
 
 void updateEnquiriesFile(vector<complaintOrEnquiry> enquiries) {
     //this function updates the enquiries.csv with the latest information
+    //remove commas
+    for (int i = 0; i < enquiries.size(); i++) {
+        enquiries.at(i).note.erase(remove(enquiries.at(i).note.begin(), enquiries.at(i).note.end(), ','), enquiries.at(i).note.end());
+    }
+
     fstream enquiriesFile;
     enquiriesFile.open("enquiries.csv", ios::out);
     if (enquiriesFile.is_open()) {
