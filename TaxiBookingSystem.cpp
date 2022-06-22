@@ -147,6 +147,7 @@ void claimLostProperty(Customer user);
 void updateLostPropertyClaimsFile(vector<lostPropertyClaim> claims);
 void contactMenu(Customer user);
 void displayUserProfile(Customer c);
+void  displayDriverProfile(Driver user);
 void makeBooking(Customer user);
 vector<Booking> readBookingsFile();
 void displayAllBookings(vector<Booking> bookings);
@@ -171,6 +172,7 @@ void displayEnquiries(vector<complaintOrEnquiry> enquiries);
 void DisplayThisDriversTransactions(Driver user);
 void displayThisDriversScheduleToday(Driver user);
 string getTodaysDateAsString();
+Customer chooseCustomer(vector<Customer> customers);
 
 // to do:     replace(myString.begin(), myString.end(), ',', ' ');
 
@@ -192,7 +194,11 @@ int main() //start menu
         getline(cin, userInput);
 
         if (userInput == "1" || userInput == "r") {
+            pageBreak();
+            cout << "\nRegister as new customer" << endl;
+            cout << "************************" << endl;
             registerNewLogin();
+            cout << "You're all signed up! Now you can login" << endl << endl;
         }
         else if (userInput == "2" || userInput == "l") {
             login();
@@ -210,7 +216,7 @@ int main() //start menu
 }
 
 void registerNewLogin() {
-    pageBreak();
+    
 
     //read customers.csv and put in vector
     vector<Customer> customerList = readCustomerFile();
@@ -218,8 +224,6 @@ void registerNewLogin() {
     //add new customer to customerList
     Customer newCustomer;
     string unverifiedEmail;
-    cout << "\nRegister as new customer" << endl;
-    cout << "************************" << endl;
     bool containsAddressSign{ false };
 
     //promt user to enter email
@@ -265,8 +269,7 @@ void registerNewLogin() {
     customerList.push_back(newCustomer);
 
     //update customers.csv
-    updateCustomersFile(customerList);
-    cout << "You're all signed up! Now you can login" << endl;
+    //updateCustomersFile(customerList);
 }
 
 void login() {
@@ -458,6 +461,7 @@ vector<Admin> readAdminsFile() {
 }
 
 void displayAllCostomers(vector<Customer>customerList) {
+    pageBreak();
     //displays all customers and their details from a vector
     for (auto c : customerList) {
         cout << "Email: " << c.email << endl;
@@ -465,6 +469,9 @@ void displayAllCostomers(vector<Customer>customerList) {
         cout << "Ph number: " << c.phoneNumber << endl;
         cout << endl;
     }
+    cout << "Press enter to continue..." << endl;
+    string contin;
+    getline(cin, contin);
 }
 
 void displayAllDrivers(vector<Driver>driversList) {
@@ -559,11 +566,46 @@ void customerMenu(Customer user) {
 }
 
 void driverMenu(Driver user) {
+    pageBreak();
     cout << "Logged in as Driver" << endl;
+    cout << "*******************" << endl;
     cout << "Welcome " << user.firstName << " " << user.lastName << endl;
-    //DisplayThisDriversTransactions(user);
-    //displayThisDriversScheduleToday(user);
-    //submitLostProperty();
+    cout << "1. View Todays Schedule" << endl;
+    cout << "2. Display your transactions" << endl;
+    cout << "3. Submit lost property" << endl;
+    cout << "4. Edit driver details" << endl;
+    cout << "5. Log out" << endl;
+    cout << "Enter option: ";
+    string userInput;
+    getline(cin, userInput);
+
+    int numUserInput = 0;
+    istringstream ssUserInput(userInput);
+    ssUserInput >> numUserInput;
+
+    switch (numUserInput)
+    {
+    case 1: 
+        displayThisDriversScheduleToday(user);
+
+        break;
+    case 2: 
+        DisplayThisDriversTransactions(user);
+        break;
+    case 3: 
+        submitLostProperty();
+        break;
+    case 4: 
+        displayDriverProfile(user);
+        
+        break;
+    case 5: 
+        return;
+        break;
+    default:
+        cout << "Invalid input" << endl;
+        break;
+    }
 
 
 
@@ -572,8 +614,84 @@ void driverMenu(Driver user) {
 }
 
 void adminMenu(Admin user) {
-    cout << "Logged in as Admin" << endl;
-    cout << "Welcome " << user.firstName << " " << user.lastName << endl;
+    bool keepRunning = true;
+
+    while (keepRunning) {
+        pageBreak();
+        vector<Customer> customers = readCustomerFile();
+        Customer editCustomer;
+
+
+
+        cout << "Logged in as Admin" << endl;
+        cout << "Welcome " << user.firstName << " " << user.lastName << endl;
+        //viewAllUsers
+        cout << "1. View all customers" << endl;
+        cout << "2. Add customers" << endl;
+        cout << "3. Edit customers details" << endl;
+        cout << "4. View all Drivers" << endl;
+        cout << "5. Add driver" << endl;
+        cout << "6. Edit driver details" << endl;
+        cout << "7. View schedule for a given day (all drivers)" << endl;
+        cout << "8. View schedule today (all drivers)" << endl;
+        cout << "9. view all transactions" << endl;
+        cout << "10. make booking" << endl;
+        cout << "11. cancel booking" << endl;
+        cout << "12.view all complaints / enquiries" << endl;
+        cout << "13. view lost property" << endl;
+        cout << "14. view lost property claims" << endl;
+        cout << "15. log out" << endl;
+        cout << "Enter option: ";
+        string userInput;
+        getline(cin, userInput);
+
+        int numUserInput = 0;
+        istringstream ssUserInput(userInput);
+        ssUserInput >> numUserInput;
+
+
+        switch (numUserInput) {
+        case 1:
+            displayAllCostomers(customers);
+            break;
+        case 2:
+            pageBreak();
+            cout << "Add new customer" << endl;
+            cout << "****************" << endl;
+            registerNewLogin(); // the last promt is not suitable for admin to see
+            cout << "User added" << endl;
+            break;
+        case 3:
+            pageBreak();
+            cout << "Edit customer" << endl;
+            cout << "*************" << endl;
+            //choose customer
+            editCustomer = chooseCustomer(customers);
+            //display customer and give options to ehit
+            displayUserProfile(editCustomer);
+            break;
+        case 4:
+            break;
+        case 5:
+            break;
+        case 6:
+            break;
+        case 7:
+            break;
+        case 8:
+            break;
+        case 9:
+            break;
+        case 10:
+            break;
+        case 11:
+            break;
+        default:
+            cout << "Invalid input" << endl;
+            break;
+        }
+    }
+
 
 
 }
@@ -671,6 +789,53 @@ void displayUserProfile(Customer c) {
             cout << "Enter ph number: ";
             getline(cin, customers.at(thisCustomer).phoneNumber);
             updateCustomersFile(customers);
+            keepRunning = false;
+        }
+        else if (userInput == "N" || userInput == "n" || userInput == "e") {
+            keepRunning = false;
+        }
+        else {
+            cout << "Invalid Input (Y/N)" << endl;
+        }
+    }
+}
+
+void  displayDriverProfile(Driver user) {
+    pageBreak();
+    vector<Driver> drivers = readDriversFile();
+    // find matching customer in vector
+    int thisDriver = 0;
+    for (int i = 0; i < drivers.size(); i++) {
+        if (drivers.at(i).email == user.email)
+            thisDriver = i;
+    }
+
+    cout << "User profile" << endl;
+    cout << "Email: " << drivers.at(thisDriver).email << endl;
+    cout << "Name: " << drivers.at(thisDriver).firstName << " " << drivers.at(thisDriver).lastName << endl;
+    cout << "Ph number: " << drivers.at(thisDriver).phoneNumber << endl;
+    cout << "Taxi Rego: " << drivers.at(thisDriver).registration << endl;
+    cout << endl;
+    cout << "*note: email cannot be changed. If you need to change email you must make a new account" << endl;
+    cout << "\nWould you like to update this information? (Y/N): ";
+
+    bool keepRunning = true;
+    while (keepRunning) {
+
+        string userInput;
+        getline(cin, userInput);
+        if (userInput == "Y" or userInput == "y") {
+
+            // promt user to update customer details
+            //cout << "cutomer at i: " << thisCustomer << ": " << customers.at(thisCustomer).email << endl;
+            cout << "Update Information for " << drivers.at(thisDriver).firstName << " " << drivers.at(thisDriver).lastName << endl << endl;
+            cout << "Enter first name: ";
+            getline(cin, drivers.at(thisDriver).firstName);
+            cout << "Enter last name: ";
+            getline(cin, drivers.at(thisDriver).lastName);
+            cout << "Enter ph number: ";
+            getline(cin, drivers.at(thisDriver).phoneNumber);
+            //updateDriversFile(drivers);
             keepRunning = false;
         }
         else if (userInput == "N" || userInput == "n" || userInput == "e") {
@@ -2006,4 +2171,33 @@ string getTodaysDateAsString() {
 
     string todaysDate = nowDay + "/" + nowMonth + "/" + nowYear;
     return todaysDate;
+}
+
+Customer chooseCustomer(vector<Customer> customers) {
+    Customer ChosenCustomer;
+
+    cout << "All customers" << endl;
+    for (int i = 0; i < customers.size(); i++) {
+        cout << i + 1 << ". " << customers.at(i).firstName << " " << customers.at(i).lastName << ", email: " << customers.at(i).email << endl;
+        
+    }
+    string userInput;
+    int numUserInput = 0;
+    bool isValidInput = false;
+    while (isValidInput == false) {
+        cout << "\nChoose customer you would like to edit by list number: ";
+
+        getline(cin, userInput);
+        istringstream ssUserInput(userInput);
+
+        if (isdigit(userInput[0])) {
+            ssUserInput >> numUserInput;
+            if(numUserInput > 0 && numUserInput < customers.size())
+                isValidInput = true;
+        }
+    }
+
+    ChosenCustomer = customers.at(numUserInput - 1);
+
+    return ChosenCustomer;
 }
