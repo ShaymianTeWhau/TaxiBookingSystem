@@ -809,21 +809,21 @@ void adminMenu(Admin user) {
         cout << "Logged in as Admin" << endl;
         cout << "Welcome " << user.firstName << " " << user.lastName << endl;
         //viewAllUsers
-        cout << "1. View all customers" << endl;
-        cout << "2. Add customers" << endl;
-        cout << "3. Edit customers details" << endl;
-        cout << "4. View all Drivers" << endl;
-        cout << "5. Add driver" << endl;
-        cout << "6. Edit driver details" << endl;
-        cout << "7. View schedule for a given day (all drivers)" << endl;
-        cout << "8. View schedule today (all drivers)" << endl;
-        cout << "9. view all transactions/cancel a booking" << endl;
-        cout << "10. make booking" << endl;
-        cout << "11.view all complaints / enquiries" << endl;
-        cout << "12. view lost property" << endl;
+        cout << "\n1. View all customers" << endl;
+        cout << "2.  Add customers" << endl;
+        cout << "3.  Edit customers details" << endl;
+        cout << "4.  View all Drivers" << endl;
+        cout << "5.  Add driver" << endl;
+        cout << "6.  Edit driver details" << endl;
+        cout << "7.  View schedule for a given day (all drivers)" << endl;
+        cout << "8.  View schedule today (all drivers)" << endl;
+        cout << "9.  View all transactions/cancel a booking" << endl;
+        cout << "10. Make booking" << endl;
+        cout << "11. View all complaints / enquiries" << endl;
+        cout << "12. View lost property" << endl;
         cout << "13. Add lost property" << endl;
-        cout << "14. view lost property claims" << endl;
-        cout << "15. log out" << endl;
+        cout << "14. View lost property claims" << endl;
+        cout << "15. Log out" << endl;
         cout << "Enter option: ";
         string userInput;
         getline(cin, userInput);
@@ -1170,6 +1170,54 @@ void displayAllLostPropertyClaims(vector<lostPropertyClaim> claims) {
         cout << c.reportedBy.email << "\t" << c.reportedBy.phoneNumber << endl << endl;
     }
     //propmt user to delete
+    bool keepRunning = true;
+    string userInput;
+    while (keepRunning) {
+        cout << "\nWould you like to remove an item? (Y/N): ";
+        getline(cin, userInput);
+
+        if (userInput == "Y" || userInput == "y") {
+            keepRunning = false;
+        }
+        else if (userInput == "N" || userInput == "n") {
+            return;
+        }
+        else {
+            cout << "Invalid input" << endl;
+        }
+    }
+    cout << "\nChoose claim to aprove" << endl;
+    for (int i = 0; i < claims.size(); i++) {
+        cout << i + 1 << ". " << claims.at(i).reportedBy.email << ", " << claims.at(i).description << endl;
+    }
+    keepRunning = true;
+    int numUserInput;
+    while (keepRunning) {
+        cout << "Enter by list number: ";
+        getline(cin, userInput);
+        // convert user input to number
+
+        if (isdigit(userInput[0])) {
+
+            istringstream ssUserInput(userInput);
+            ssUserInput >> numUserInput;
+            numUserInput--;
+
+            if (numUserInput >= 0 && numUserInput < claims.size()) {
+                keepRunning = false;
+            }
+
+        }
+    }
+    // use number to delete an item from list
+    claims.erase(claims.begin() + numUserInput);
+
+    // displayEnquiries(enquiries);
+
+    updateLostPropertyClaimsFile(claims);
+
+    cout << "Claim aproved" << endl;
+
 }
 
 void updateLostPropertyFile(vector<lostProperty> lostPropertyList) {
@@ -1195,6 +1243,54 @@ void displayAllLostProperty() {
         cout << l.description << ", submitted by " << l.submittedBy << endl;
     }
     //prompt to remove
+    bool keepRunning = true;
+    string userInput;
+    while (keepRunning) {
+        cout << "\nWould you like to remove an item? (Y/N): ";
+        getline(cin, userInput);
+
+        if (userInput == "Y" || userInput == "y") {
+            keepRunning = false;
+        }
+        else if (userInput == "N" || userInput == "n") {
+            return;
+        }
+        else {
+            cout << "Invalid input" << endl;
+        }
+    }
+    cout << "\nChoose item to remove" << endl;
+    for (int i = 0; i < lostPropertyList.size(); i++) {
+        cout << i + 1 << ". " << lostPropertyList.at(i).description << endl;
+    }
+    keepRunning = true;
+    int numUserInput;
+    while (keepRunning) {
+        cout << "Enter by list number: ";
+        getline(cin, userInput);
+        // convert user input to number
+
+        if (isdigit(userInput[0])) {
+
+            istringstream ssUserInput(userInput);
+            ssUserInput >> numUserInput;
+            numUserInput--;
+
+            if (numUserInput >= 0 && numUserInput < lostPropertyList.size()) {
+                keepRunning = false;
+            }
+
+        }
+    }
+    // use number to delete an item from list
+    lostPropertyList.erase(lostPropertyList.begin() + numUserInput);
+
+    // displayEnquiries(enquiries);
+
+    updateLostPropertyFile(lostPropertyList);
+
+    cout << "Lost item has been removed" << endl;
+
 }
 
 void claimLostProperty(Customer user) {
@@ -2383,8 +2479,54 @@ void displayEnquiries(vector<complaintOrEnquiry> enquiries) {
         cout << e.note << endl;
         cout << endl;
     }
-    // promt to delete
+    bool keepRunning = true;
+    string userInput;
+    while (keepRunning) {
+        cout << "\nWould you like to delete an enquiry? (Y/N): ";
+        getline(cin, userInput);
 
+        if (userInput == "Y" || userInput == "y") {
+            keepRunning = false;
+        }
+        else if (userInput == "N" || userInput == "n") {
+            return;
+        }
+        else {
+            cout << "Invalid input" << endl;
+        }
+    }
+    cout << "\nChoose complaint/enquiry to delete" << endl;
+    for (int i = 0; i < enquiries.size(); i++) {
+        cout << i + 1 << ". " << enquiries.at(i).enquiryType;
+        cout << ": " << enquiries.at(i).note << endl;
+    }
+    keepRunning = true;
+    int numUserInput;
+    while (keepRunning) {
+        cout << "Enter by list number: ";
+        getline(cin, userInput);
+        // convert user input to number
+
+        if (isdigit(userInput[0])) {
+
+            istringstream ssUserInput(userInput);
+            ssUserInput >> numUserInput;
+            numUserInput--;
+
+            if (numUserInput >= 0 && numUserInput < enquiries.size()) {
+                keepRunning = false;
+            }
+
+        }
+    }
+    // use number to delete an item from list
+    enquiries.erase(enquiries.begin() + numUserInput);
+
+   // displayEnquiries(enquiries);
+
+    updateEnquiriesFile(enquiries);
+    
+    cout << "complaint/enquiry deleted" << endl;
 
 }
 
