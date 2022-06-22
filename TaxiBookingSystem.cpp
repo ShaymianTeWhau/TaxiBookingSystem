@@ -173,6 +173,8 @@ void DisplayThisDriversTransactions(Driver user);
 void displayThisDriversScheduleToday(Driver user);
 string getTodaysDateAsString();
 Customer chooseCustomer(vector<Customer> customers);
+void displayFullSchedule(string date);
+string promtForDate();
 
 // to do:     replace(myString.begin(), myString.end(), ',', ' ');
 
@@ -634,6 +636,8 @@ void adminMenu(Admin user) {
         pageBreak();
         vector<Customer> customers = readCustomerFile();
         Customer editCustomer;
+        string todaysDate = getTodaysDateAsString();
+        string chosenDate;
 
 
 
@@ -691,8 +695,12 @@ void adminMenu(Admin user) {
         case 6:
             break;
         case 7:
+            // display full schedule for a given day
+            chosenDate = promtForDate();
+            displayFullSchedule(chosenDate);
             break;
         case 8:
+            displayFullSchedule(todaysDate);
             break;
         case 9:
             break;
@@ -2215,4 +2223,143 @@ Customer chooseCustomer(vector<Customer> customers) {
     ChosenCustomer = customers.at(numUserInput - 1);
 
     return ChosenCustomer;
+}
+
+void displayFullSchedule(string date) {
+    // convert todays date
+   //cout << "Todays date: " << endl;
+   ////cout << "now: " << now << endl;
+   //cout << "day: " << newtime.tm_mday << endl;
+   //cout << "Month: " << 1 + newtime.tm_mon << endl;
+   //cout << "year: " << ( -100) + newtime.tm_year << endl;
+
+   // check if there is a chedule for todays date
+    replace(date.begin(), date.end(), '/', '-');
+
+    //cout << "Today: " << date << endl;
+
+
+
+
+    // converting date format ( DD/MM/YY ) to a schedule filename ( schedule/ DD-MM-YY.csv )
+
+    vector <vector <string>> schedule = {
+        {},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},
+    };
+    vector<Booking> bookings = readBookingsFile();
+    vector<Customer> customers = readCustomerFile();
+    string directory = "schedule/";
+    string extension = ".csv";
+    string filename = directory + date + extension;             //look for availibilityfile, if there is no file, then make one before opening
+
+    // check for a schedule with this filename (schedule / DD - MM - YY.csv) 
+    // if no such schedule is found for this date then it will have to be created
+    checkForSchedule(filename);
+
+    // find schedule for this date and input to vector<string> availableTimes
+    schedule = readSchedule(filename);
+
+    // update availableTimes vector with any new drivers have been added
+    schedule = addNewDriversToSchedule(schedule);
+
+
+
+
+    // use ref number (personalDriverSchedule.at(i).at(1)) to find Booking and Customer, 
+
+
+    // display personalDriverSchedule
+    pageBreak();
+    cout << "Schedule for " << date << endl;
+    cout << "***************" << endl << endl;
+
+    for (int i = 0; i < schedule.size(); i++) {
+        for (int j = 0; j < schedule.at(i).size(); j++) {
+            cout << schedule.at(i).at(j) << ", ";
+        }cout << endl;
+    }
+
+    // promt driver to exit, or reject booking // no actually only admin can do this
+    cout << "press enter to continue...\n";
+    string contin;
+    getline(cin, contin);
+}
+
+string promtForDate() {
+    string userInputDate = "12345678";
+    int digitCount = 0;
+    bool isDateValid = true;
+    string sMonth;
+    int month = 0;
+    string sDay;
+    int day = 0;
+    string sYear;
+    int year = 0;
+    vector<int> daysInEachMonth = { 31,28,31,30,31,30,31,31,30,31,30,31 };
+    int timeFrame = 90;
+
+    do {
+        isDateValid = true;
+        digitCount = 0;
+        // promt user
+        cout << "Type a date to see availability (DD/MM/YY): ";
+        getline(cin, userInputDate);
+        //if (userInputDate == "E" || userInputDate == "e") return "void";
+
+        // validate length
+        if (userInputDate.length() == 8) {
+
+            // check for 2 instances of '/'
+            if (userInputDate[2] != '/' || userInputDate[5] != '/') {
+                isDateValid = false;
+                cout << "Incorrect '/'" << endl;
+
+            }
+
+            // ensure digit count is 6
+            // loop through userInputDate to ensure 6 integers were used
+            for (int i = 0; i < userInputDate.length(); i++) {
+                if (isdigit(userInputDate[i])) {
+                    digitCount++;
+                }
+            }
+            if (digitCount != 6) {
+                isDateValid = false;
+            }
+
+            // validate date exists, for exmaple, the 31st of February is invalid
+            if (isdigit(userInputDate[0]) && isdigit(userInputDate[1]) && isdigit(userInputDate[3]) && isdigit(userInputDate[4]) && isdigit(userInputDate[6]) && isdigit(userInputDate[7])) // to ensure program does not crash
+            {
+                string sMonth = userInputDate.substr(3, 2);
+                stringstream ssMonth(sMonth);
+                ssMonth >> month;
+                string sDay = userInputDate.substr(0, 2);
+                stringstream ssDay(sDay);
+                ssDay >> day;
+            }
+            // month cannot be over 12
+            // cout << "month: " << month << endl;
+            if (month < 1 || month > 12) {
+                isDateValid = false;
+                cout << "Invalid month" << endl;
+            }
+            // Day cannot be over 28,30,31 depending on month                                                //======= test this more ==========
+            if (month < 13) {
+                //cout << "day: " << day << endl;
+                if (day < 1 || day > daysInEachMonth.at(month - 1)) {
+                    isDateValid = false;
+                    cout << "month " << month << ", does not contain " << day << " days" << endl;
+                }
+            }
+        }
+        else {
+            isDateValid = false;
+            cout << "Date format not valid" << endl;
+        }
+
+    } while (isDateValid == false);
+
+
+    return userInputDate;
+    
 }
