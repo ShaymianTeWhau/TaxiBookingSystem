@@ -124,6 +124,7 @@ struct complaintOrEnquiry {
 
 //prototypes
 void registerNewLogin();
+void registerNewDriver();
 void login();
 vector<Customer> readCustomerFile(); 
 vector<Driver> readDriversFile();
@@ -132,6 +133,7 @@ void displayAllCostomers(vector<Customer>customerList);
 void displayAllDrivers(vector<Driver>driversList);
 void displayAllAdmin(vector<Admin>adminList);
 void updateCustomersFile(vector<Customer> customers);
+void updateDriversFile(vector<Driver> drivers);
 string createAndCheckPassword();
 void customerMenu(Customer user);
 void driverMenu(Driver user);
@@ -174,8 +176,10 @@ void DisplayThisDriversTransactions(Driver user);
 void displayThisDriversScheduleToday(Driver user);
 string getTodaysDateAsString();
 Customer chooseCustomer(vector<Customer> customers);
+Driver chooseDriver(vector<Driver> drivers);
 void displayFullSchedule(string date);
 string promtForDate();
+
 
 // to do:     replace(myString.begin(), myString.end(), ',', ' ');
 
@@ -272,7 +276,150 @@ void registerNewLogin() {
     customerList.push_back(newCustomer);
 
     //update customers.csv
-    //updateCustomersFile(customerList);
+    updateCustomersFile(customerList);
+}
+
+void registerNewDriver() {
+
+
+    //read drivers.csv and put in vector
+    vector<Driver> driversList = readDriversFile();
+    displayAllDrivers(driversList);
+    //cout << "Start: " << driversList.at(1).driverStart << " Finish: " << driversList.at(1).driverFinish << endl;
+    //add new driver to driversList
+    Driver newDriver;
+    string unverifiedEmail;
+    bool containsAddressSign{ false };
+
+    //promt user to enter email
+    while (containsAddressSign == false) {
+        cout << "\nEnter email (This will be the drivers username): " << endl;
+        cout << "(note: type 'e' to cancel and exit)" << endl;
+        getline(cin, unverifiedEmail);
+
+        if (unverifiedEmail == "e") return; //if user types 'e' for exit, they will return to start menu
+
+        //make sure email has '@' symbol and a '.' symbol 
+        if (unverifiedEmail.find('@') != string::npos && unverifiedEmail.find('.') != string::npos) {
+            containsAddressSign = true;
+        }
+        else cout << "Invalid email, example: johnappleseed@email.com" << endl;
+    }
+
+    //verify that email is not a conflict
+    for (auto d : driversList) {
+        if (d.email == unverifiedEmail) {
+            cout << "Email address already exists" << endl;
+            return;
+        }
+    }
+
+    //get new driver details
+    string userInputTime;
+    double numUserInputTime;
+    newDriver.email = unverifiedEmail;
+    cout << "Enter first name: ";
+    getline(cin, newDriver.firstName);
+    if (newDriver.firstName == "e") return; //if user types 'e' for exit, they will return to start menu
+
+    cout << "Enter last name: ";
+    getline(cin, newDriver.lastName);
+    if (newDriver.lastName == "e") return; //if user types 'e' for exit, they will return to start menu
+
+    cout << "Enter phone number: ";
+    getline(cin, newDriver.phoneNumber);
+    if (newDriver.phoneNumber == "e") return; //if user types 'e' for exit, they will return to start menu
+
+    cout << "Enter drivers liscence number: ";
+    getline(cin, newDriver.licence);
+    if (newDriver.licence == "e") return; //if user types 'e' for exit, they will return to start menu
+
+    cout << "Enter taxi registration number: ";
+    getline(cin, newDriver.registration);
+    if (newDriver.registration == "e") return; //if user types 'e' for exit, they will return to start menu
+
+    cout << "\nYour almost there... Input work hours for new driver" << endl;
+    cout << "Note: Times must be entered in 24hr time, 0.00 to 23.30" << endl;
+    cout << "and must be divisible by the half hour. For example, 01.00, 05.30, 13.00, 17.30 etc" << endl << endl;
+
+    bool isDriverHoursValid = false;
+    while (isDriverHoursValid == false) {
+        bool keepRunning = true;
+        while (keepRunning) {
+            //promt for time format ( HH.MM ) and round up to hh.00 or hh.30
+            //newDriver.driverStart 
+            cout << "Enter time that driver starts each day: ";
+            getline(cin, userInputTime);
+            if (userInputTime == "e") return; //if user types 'e' for exit, they will return to start menu
+            // HH.MM
+
+            if (userInputTime.length() == 4)
+                userInputTime = "0" + userInputTime;
+
+            if (userInputTime.length() == 5) {
+
+                if (isdigit(userInputTime[0]) && isdigit(userInputTime[1]) && userInputTime[2] == '.' && (userInputTime[3] == '3' || userInputTime[3] == '0') && userInputTime[4] == '0') {
+                    istringstream ssUserInputTime(userInputTime);
+                    ssUserInputTime >> numUserInputTime;
+                    if (numUserInputTime >= 0.0 && numUserInputTime < 24.0)
+                        keepRunning = false;
+                }
+            }
+        }
+        cout << "userInput time start:" << numUserInputTime << endl;
+        newDriver.driverStart = numUserInputTime;
+
+
+        keepRunning = true;
+        while (keepRunning) {
+            //newDriver.driverFinish
+            cout << "Enter time that driver finishes each day: ";
+            getline(cin, userInputTime);
+            if (userInputTime == "e") return; //if user types 'e' for exit, they will return to start menu
+            if (userInputTime.length() == 4)
+                userInputTime = "0" + userInputTime;
+
+            if (userInputTime.length() == 5) {
+
+                if (isdigit(userInputTime[0]) && isdigit(userInputTime[1]) && userInputTime[2] == '.' && (userInputTime[3] == '3' || userInputTime[3] == '0') && userInputTime[4] == '0') {
+                    istringstream ssUserInputTime(userInputTime);
+                    ssUserInputTime >> numUserInputTime;
+                    if (numUserInputTime >= 0.0 && numUserInputTime < 24.0)
+                        keepRunning = false;
+                }
+            }
+        }
+        cout << "userInput time finish:" << numUserInputTime << endl;
+        newDriver.driverFinish = numUserInputTime;
+
+        //make sure driver hours do not exceed 12 hours
+        //driver finish plus 12 //if driver finish < driver start : driver finish += 12 // if (driver finish - driver start < 12 break loop)
+        double startTime = newDriver.driverStart;
+        double endTime = newDriver.driverFinish;
+        if (endTime <= newDriver.driverStart) {
+            endTime += 12;
+            startTime -= 12;
+        }
+
+        double totalHours = endTime - startTime;
+
+        if (totalHours < 12) {
+            isDriverHoursValid = true;
+        }
+        else {
+            cout << "Driver hours cannot exceed 12 hours" << endl;
+        }
+
+    }
+
+    //check password    
+
+    newDriver.password = createAndCheckPassword();
+    driversList.push_back(newDriver);
+
+
+    //update drivers.csv
+    updateDriversFile(driversList);
 }
 
 void login() {
@@ -485,8 +632,13 @@ void displayAllDrivers(vector<Driver>driversList) {
         cout << "Ph number: " << d.phoneNumber << endl;
         cout << "License number: " << d.licence << endl;
         cout << "Registration: " << d.registration << endl;
+        cout << "Start: " << d.driverStart << endl;
+        cout << "Finish: " << d.driverFinish << endl;
         cout << endl;
     }
+    cout << "Press enter to continue..." << endl;
+    string contin;
+    getline(cin, contin);
 }
 
 void displayAllAdmin(vector<Admin>adminList) {
@@ -497,6 +649,9 @@ void displayAllAdmin(vector<Admin>adminList) {
         cout << "Ph number: " << a.phoneNumber << endl;
         cout << endl;
     }
+    cout << "Press enter to continue..." << endl;
+    string contin;
+    getline(cin, contin);
 };
 
 void updateCustomersFile(vector<Customer> customers) {
@@ -636,7 +791,11 @@ void adminMenu(Admin user) {
     while (keepRunning) {
         pageBreak();
         vector<Customer> customers = readCustomerFile();
+        vector<Driver> drivers = readDriversFile();
+        vector<Admin> admin = readAdminsFile();
         Customer editCustomer;
+        Driver editDriver;
+        Admin editAdmin;
         string todaysDate = getTodaysDateAsString();
         string chosenDate;
 
@@ -653,13 +812,12 @@ void adminMenu(Admin user) {
         cout << "6. Edit driver details" << endl;
         cout << "7. View schedule for a given day (all drivers)" << endl;
         cout << "8. View schedule today (all drivers)" << endl;
-        cout << "9. view all transactions" << endl;
+        cout << "9. view all transactions/cancel a booking" << endl;
         cout << "10. make booking" << endl;
-        cout << "11. cancel booking" << endl;
-        cout << "12.view all complaints / enquiries" << endl;
-        cout << "13. view lost property" << endl;
-        cout << "14. view lost property claims" << endl;
-        cout << "15. log out" << endl;
+        cout << "11.view all complaints / enquiries" << endl;
+        cout << "12. view lost property" << endl;
+        cout << "13. view lost property claims" << endl;
+        cout << "14. log out" << endl;
         cout << "Enter option: ";
         string userInput;
         getline(cin, userInput);
@@ -686,14 +844,30 @@ void adminMenu(Admin user) {
             cout << "*************" << endl;
             //choose customer
             editCustomer = chooseCustomer(customers);
-            //display customer and give options to ehit
+            //display customer and give options to edit
             displayUserProfile(editCustomer);
             break;
         case 4:
+            pageBreak();
+            cout << "All Drivers" << endl;
+            cout << "***********" << endl;
+
+            displayAllDrivers(drivers);
             break;
         case 5:
+            //add driver
+            cout << "Register new Driver" << endl;
+            cout << "*******************" << endl;
+            registerNewDriver();
             break;
         case 6:
+            pageBreak();
+            cout << "Edit Driver" << endl;
+            cout << "***********" << endl;
+            //choose driver
+            editDriver = chooseDriver(drivers);
+            //display customer and give options to edit
+            displayDriverProfile(editDriver);
             break;
         case 7:
             // display full schedule for a given day
@@ -715,6 +889,16 @@ void adminMenu(Admin user) {
             makeBooking(editCustomer);
             break;
         case 11:
+            //cout << "12.view all complaints / enquiries" << endl;
+            break;
+        case 12:
+            //cout << "13. view lost property" << endl;
+            break;
+        case 13:
+            //cout << "14. view lost property claims" << endl;
+            break;
+        case 14:
+            //cout << "15. log out" << endl;
             break;
         default:
             cout << "Invalid input" << endl;
@@ -2363,7 +2547,7 @@ Customer chooseCustomer(vector<Customer> customers) {
 
         if (isdigit(userInput[0])) {
             ssUserInput >> numUserInput;
-            if(numUserInput > 0 && numUserInput < customers.size())
+            if(numUserInput > 0 && numUserInput < customers.size()+1)
                 isValidInput = true;
         }
     }
@@ -2371,6 +2555,35 @@ Customer chooseCustomer(vector<Customer> customers) {
     ChosenCustomer = customers.at(numUserInput - 1);
 
     return ChosenCustomer;
+}
+
+Driver chooseDriver(vector<Driver> drivers) {
+    Driver ChosenDriver;
+
+    cout << "All drivers" << endl;
+    for (int i = 0; i < drivers.size(); i++) {
+        cout << i + 1 << ". " << drivers.at(i).firstName << " " << drivers.at(i).lastName << ", email: " << drivers.at(i).email << endl;
+
+    }
+    string userInput;
+    int numUserInput = 0;
+    bool isValidInput = false;
+    while (isValidInput == false) {
+        cout << "\nChoose driver you would like to edit by list number: ";
+
+        getline(cin, userInput);
+        istringstream ssUserInput(userInput);
+
+        if (isdigit(userInput[0])) {
+            ssUserInput >> numUserInput;
+            if (numUserInput > 0 && numUserInput < drivers.size()+1)
+                isValidInput = true;
+        }
+    }
+
+    ChosenDriver = drivers.at(numUserInput - 1);
+
+    return ChosenDriver;
 }
 
 void displayFullSchedule(string date) {
