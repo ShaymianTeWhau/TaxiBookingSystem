@@ -508,6 +508,20 @@ void updateCustomersFile(vector<Customer> customers) {
     }
 }
 
+void updateDriversFile(vector<Driver> drivers) {
+    fstream driversFile;
+    driversFile.open("drivers.csv", ios::out);
+    if (driversFile.is_open()) {
+        for (int i = 0; i < drivers.size(); i++) {
+            driversFile << drivers[i].email << "," << drivers[i].firstName << ","
+                << drivers[i].lastName << "," << drivers[i].phoneNumber << "," << drivers[i].password << ","
+                << drivers[i].licence << "," << drivers[i].registration << "," << drivers[i].driverStart 
+                << "," << drivers[i].driverFinish << endl;
+        }
+        driversFile.close();
+    }
+}
+
 string createAndCheckPassword() {
     //ask user to create password, then asks them to enter in password again to return password
     string tempPassword{ "temp" };
@@ -835,7 +849,8 @@ void  displayDriverProfile(Driver user) {
             getline(cin, drivers.at(thisDriver).lastName);
             cout << "Enter ph number: ";
             getline(cin, drivers.at(thisDriver).phoneNumber);
-            //updateDriversFile(drivers);
+            updateDriversFile(drivers);
+            cout << "Information saved" << endl;
             keepRunning = false;
         }
         else if (userInput == "N" || userInput == "n" || userInput == "e") {
