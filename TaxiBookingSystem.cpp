@@ -739,46 +739,49 @@ void customerMenu(Customer user) {
 
 void driverMenu(Driver user) {
     pageBreak();
-    cout << "Logged in as Driver" << endl;
-    cout << "*******************" << endl;
-    cout << "Welcome " << user.firstName << " " << user.lastName << endl;
-    cout << "1. View Todays Schedule" << endl;
-    cout << "2. Display your transactions" << endl;
-    cout << "3. Submit lost property" << endl;
-    cout << "4. Edit driver details" << endl;
-    cout << "5. Log out" << endl;
-    cout << "Enter option: ";
-    string userInput;
-    getline(cin, userInput);
+    bool keepRunning = true;
+    while (keepRunning) {
+        cout << "Logged in as Driver" << endl;
+        cout << "*******************" << endl;
+        cout << "Welcome " << user.firstName << " " << user.lastName << endl;
+        cout << "1. View Todays Schedule" << endl;
+        cout << "2. Display your transactions" << endl;
+        cout << "3. Submit lost property" << endl;
+        cout << "4. Edit driver details" << endl;
+        cout << "5. Log out" << endl;
+        cout << "Enter option: ";
+        string userInput;
+        getline(cin, userInput);
 
-    int numUserInput = 0;
-    istringstream ssUserInput(userInput);
-    ssUserInput >> numUserInput;
+        int numUserInput = 0;
+        istringstream ssUserInput(userInput);
+        ssUserInput >> numUserInput;
 
-    switch (numUserInput)
-    {
-    case 1: 
-        displayThisDriversScheduleToday(user);
+        switch (numUserInput)
+        {
+        case 1:
+            displayThisDriversScheduleToday(user);
 
-        break;
-    case 2: 
-        DisplayThisDriversTransactions(user);
-        break;
-    case 3: 
-        submitLostProperty();
-        break;
-    case 4: 
-        displayDriverProfile(user);
-        
-        break;
-    case 5: 
-        return;
-        break;
-    default:
-        cout << "Invalid input" << endl;
-        break;
+            break;
+        case 2:
+            DisplayThisDriversTransactions(user);
+            break;
+        case 3:
+            submitLostProperty();
+            break;
+        case 4:
+            displayDriverProfile(user);
+
+            break;
+        case 5:
+            keepRunning = false;
+            return;
+            break;
+        default:
+            cout << "Invalid input" << endl;
+            break;
+        }
     }
-
 
 
 
@@ -793,6 +796,8 @@ void adminMenu(Admin user) {
         vector<Customer> customers = readCustomerFile();
         vector<Driver> drivers = readDriversFile();
         vector<Admin> admin = readAdminsFile();
+        vector<lostPropertyClaim> claims = readLostPropertyClaimsFile();
+        vector<complaintOrEnquiry> enquiries = readEnquiriesFile();
         Customer editCustomer;
         Driver editDriver;
         Admin editAdmin;
@@ -816,8 +821,9 @@ void adminMenu(Admin user) {
         cout << "10. make booking" << endl;
         cout << "11.view all complaints / enquiries" << endl;
         cout << "12. view lost property" << endl;
-        cout << "13. view lost property claims" << endl;
-        cout << "14. log out" << endl;
+        cout << "13. Add lost property" << endl;
+        cout << "14. view lost property claims" << endl;
+        cout << "15. log out" << endl;
         cout << "Enter option: ";
         string userInput;
         getline(cin, userInput);
@@ -882,23 +888,33 @@ void adminMenu(Admin user) {
             break;
         case 10:
             // make booking
-            cout << "Choose customer" << endl;
+            cout << "\nChoose customer" << endl;
             cout << "***************" << endl;
             //choose customer
             editCustomer = chooseCustomer(customers);
             makeBooking(editCustomer);
             break;
         case 11:
-            //cout << "12.view all complaints / enquiries" << endl;
+            //view all complaints / enquiries
+            cout << "\nComplaints and enquiries" << endl;
+            cout << "************************" << endl;
+            displayEnquiries(enquiries);
             break;
         case 12:
-            //cout << "13. view lost property" << endl;
+            //view lost property
+            displayAllLostProperty();
             break;
         case 13:
-            //cout << "14. view lost property claims" << endl;
+            //add lostProperty
+            submitLostProperty();
             break;
         case 14:
-            //cout << "15. log out" << endl;
+            //view lost property claims
+            displayAllLostPropertyClaims(claims);
+            break;
+        case 15:
+            //log out
+            keepRunning = false;
             break;
         default:
             cout << "Invalid input" << endl;
@@ -1145,11 +1161,15 @@ vector<lostPropertyClaim> readLostPropertyClaimsFile() {
 }
 
 void displayAllLostPropertyClaims(vector<lostPropertyClaim> claims) {
+    pageBreak();
+    cout << "Pending lost property claims" << endl;
+    cout << "****************************" << endl;
     for (auto c : claims) {
         cout << c.description << endl;
         cout << "Claim by " << c.reportedBy.firstName << " " << c.reportedBy.lastName << endl;
         cout << c.reportedBy.email << "\t" << c.reportedBy.phoneNumber << endl << endl;
     }
+    //propmt user to delete
 }
 
 void updateLostPropertyFile(vector<lostProperty> lostPropertyList) {
@@ -1166,12 +1186,15 @@ void updateLostPropertyFile(vector<lostProperty> lostPropertyList) {
 
 void displayAllLostProperty() {
     pageBreak();
+    cout << "Lost property" << endl;
+    cout << "*************\n" << endl;
     vector<lostProperty> lostPropertyList = readLostPropertyFile();
 
     cout << "lost property" << endl;
     for (auto l : lostPropertyList) {
         cout << l.description << ", submitted by " << l.submittedBy << endl;
     }
+    //prompt to remove
 }
 
 void claimLostProperty(Customer user) {
@@ -2360,6 +2383,9 @@ void displayEnquiries(vector<complaintOrEnquiry> enquiries) {
         cout << e.note << endl;
         cout << endl;
     }
+    // promt to delete
+
+
 }
 
 void DisplayThisDriversTransactions(Driver user) {
