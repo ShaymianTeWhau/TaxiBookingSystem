@@ -707,6 +707,12 @@ void adminMenu(Admin user) {
             displayAllTransactions();
             break;
         case 10:
+            // make booking
+            cout << "Choose customer" << endl;
+            cout << "***************" << endl;
+            //choose customer
+            editCustomer = chooseCustomer(customers);
+            makeBooking(editCustomer);
             break;
         case 11:
             break;
