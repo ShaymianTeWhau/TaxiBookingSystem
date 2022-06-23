@@ -1,11 +1,11 @@
 #include <iostream>
 #include <fstream> // read and write to files
-#include <vector> // 
-#include <string>
-#include <sstream>
-#include <algorithm>
+#include <vector> // use of vectors instead of arrays
+#include <string> // getline()
+#include <sstream> // istringstream 
+#include <algorithm> // replace()
 #include <ctype.h> // isdigit()
-#include <ctime>
+#include <ctime> // to get todays date
 using namespace std;
 
 struct Customer {
@@ -225,8 +225,8 @@ int main() //start menu
 }
 
 void registerNewLogin() {
+    // this function promts the user to create a new customer login
     
-
     //read customers.csv and put in vector
     vector<Customer> customerList = readCustomerFile();
 
@@ -284,6 +284,7 @@ void registerNewLogin() {
 }
 
 void registerNewDriver() {
+    // this function promts the user to create a new driver login
 
 
     //read drivers.csv and put in vector
@@ -433,11 +434,12 @@ void registerNewDriver() {
 }
 
 void registerNewAdmin() {
+    // this function promts the user to create a new admin login
 
-    //read customers.csv and put in vector
+    //read admin.csv and put in vector
     vector<Admin> adminList = readAdminsFile();
 
-    //add new customer to customerList
+    //add new customer to adminList
     Admin newAdmin;
     string unverifiedEmail;
     bool containsAddressSign{ false };
@@ -486,12 +488,14 @@ void registerNewAdmin() {
 
     
 
-    //update customers.csv
+    //update admin.csv
     updateAdminFile(adminList);
     cout << "New admin created" << endl;
 }
 
 void login() {
+    //this function promts the user to login and checks if they are a customer, driver or admin
+
     //read customers.csv
     vector<Customer> customerList = readCustomerFile();
     //read staff.csv
@@ -724,6 +728,8 @@ void displayAllAdmin(vector<Admin>adminList) {
 };
 
 void updateCustomersFile(vector<Customer> customers) {
+    // this function writes to the file customers.csv
+
     //remove commas
     for (int i = 0; i < customers.size(); i++) {
         customers.at(i).email.erase(remove(customers.at(i).email.begin(), customers.at(i).email.end(), ','), customers.at(i).email.end());
@@ -747,6 +753,7 @@ void updateCustomersFile(vector<Customer> customers) {
 }
 
 void updateAdminFile(vector<Admin> admin) {
+    //writes to admin.csv
     //remove commas
     for (int i = 0; i < admin.size(); i++) {
         admin.at(i).email.erase(remove(admin.at(i).email.begin(), admin.at(i).email.end(), ','), admin.at(i).email.end());
@@ -768,6 +775,8 @@ void updateAdminFile(vector<Admin> admin) {
 }
 
 void updateDriversFile(vector<Driver> drivers) {
+    //this function writes to drivers.csv
+
     //remove commas
     for (int i = 0; i < drivers.size(); i++) {
         drivers.at(i).email.erase(remove(drivers.at(i).email.begin(), drivers.at(i).email.end(), ','), drivers.at(i).email.end());
@@ -840,12 +849,12 @@ void customerMenu(Customer user) {
         }
         else if (userSelect == "5") {
             cout << "User Logged Out Successfully" << endl;
-            //keepRunning = false;
             return;
         }
         else {
             cout << "Invalid Input, Choose from the menu" << endl;
         }
+        pageBreak();
     }
 }
 
@@ -893,6 +902,7 @@ void driverMenu(Driver user) {
             cout << "Invalid input" << endl;
             break;
         }
+        pageBreak();
     }
 
 
@@ -903,8 +913,11 @@ void driverMenu(Driver user) {
 void adminMenu(Admin user) {
     bool keepRunning = true;
 
+    pageBreak();
+    cout << "Logged in as Admin" << endl;
+    cout << "Welcome " << user.firstName << " " << user.lastName << endl;
+
     while (keepRunning) {
-        pageBreak();
         vector<Customer> customers = readCustomerFile();
         vector<Driver> drivers = readDriversFile();
         vector<Admin> admin = readAdminsFile();
@@ -918,8 +931,6 @@ void adminMenu(Admin user) {
 
 
 
-        cout << "Logged in as Admin" << endl;
-        cout << "Welcome " << user.firstName << " " << user.lastName << endl;
         //viewAllUsers
         cout << "\n1. View all customers" << endl;
         cout << "2.  Add customers" << endl;
@@ -1036,7 +1047,6 @@ void adminMenu(Admin user) {
             break;
         case 16:
             //Add admin
-            //add driver
             cout << "Register new admin" << endl;
             cout << "******************" << endl;
             registerNewAdmin();
@@ -1061,9 +1071,7 @@ void adminMenu(Admin user) {
             break;
         }
     }
-
-
-
+    pageBreak();
 }
 
 void contactMenu(Customer user) {
@@ -1173,7 +1181,7 @@ void displayUserProfile(Customer c) {
 void displayAdminProfile(Admin a) {
     pageBreak();
     vector<Admin> admin = readAdminsFile();
-    // find matching customer in vector
+    // find matching admin in vector
     int thisAdmin = 0;
     for (int i = 0; i < admin.size(); i++) {
         if (admin.at(i).email == a.email)
@@ -1195,8 +1203,7 @@ void displayAdminProfile(Admin a) {
         getline(cin, userInput);
         if (userInput == "Y" or userInput == "y") {
 
-            // promt user to update customer details
-            //cout << "cutomer at i: " << thisCustomer << ": " << customers.at(thisCustomer).email << endl;
+            // promt user to update admin details
             cout << "Update Information for " << admin.at(thisAdmin).firstName << " " << admin.at(thisAdmin).lastName << endl << endl;
             cout << "Enter first name: ";
             getline(cin, admin.at(thisAdmin).firstName);
@@ -1219,7 +1226,7 @@ void displayAdminProfile(Admin a) {
 void  displayDriverProfile(Driver user) {
     pageBreak();
     vector<Driver> drivers = readDriversFile();
-    // find matching customer in vector
+    // find matching driver in vector
     int thisDriver = 0;
     for (int i = 0; i < drivers.size(); i++) {
         if (drivers.at(i).email == user.email)
@@ -1242,8 +1249,7 @@ void  displayDriverProfile(Driver user) {
         getline(cin, userInput);
         if (userInput == "Y" or userInput == "y") {
 
-            // promt user to update customer details
-            //cout << "cutomer at i: " << thisCustomer << ": " << customers.at(thisCustomer).email << endl;
+            // promt user to update driver details
             cout << "Update Information for " << drivers.at(thisDriver).firstName << " " << drivers.at(thisDriver).lastName << endl << endl;
             cout << "Enter first name: ";
             getline(cin, drivers.at(thisDriver).firstName);
@@ -1403,7 +1409,9 @@ void displayAllLostPropertyClaims(vector<lostPropertyClaim> claims) {
     updateLostPropertyClaimsFile(claims);
 
     cout << "Claim aproved" << endl;
-
+    cout << "Press enter to continue..." << endl;
+    string contin;
+    getline(cin, contin);
 }
 
 void updateLostPropertyFile(vector<lostProperty> lostPropertyList) {
@@ -1478,17 +1486,17 @@ void displayAllLostProperty() {
     // use number to delete an item from list
     lostPropertyList.erase(lostPropertyList.begin() + numUserInput);
 
-    // displayEnquiries(enquiries);
-
     updateLostPropertyFile(lostPropertyList);
 
     cout << "Lost item has been removed" << endl;
-
+    cout << "Press enter to continue..." << endl;
+    string contin;
+    getline(cin, contin);
 }
 
 void claimLostProperty(Customer user) {
     pageBreak();
-
+    //submenu for user to claim lost property
     vector<lostPropertyClaim> lostPropertyClaims = readLostPropertyClaimsFile();
     lostPropertyClaim newLostPropertyClaim;
 
@@ -1502,6 +1510,9 @@ void claimLostProperty(Customer user) {
 
     updateLostPropertyClaimsFile(lostPropertyClaims);
     cout << "Thankyou. We will contact you if we find anything :)" << endl;
+    cout << "Press enter to continue..." << endl;
+    string contin;
+    getline(cin, contin);
 }
 
 void updateLostPropertyClaimsFile(vector<lostPropertyClaim> claims) {
@@ -1595,14 +1606,12 @@ void makeBooking(Customer user) {
                 ssDay >> day;
             }
             // month cannot be over 12
-            // cout << "month: " << month << endl;
             if (month < 1 || month > 12) {
                 isDateValid = false;
                 cout << "Invalid month" << endl;
             }
-            // Day cannot be over 28,30,31 depending on month                                                //======= test this more ==========
+            // Day cannot be over 28,30,31 depending on month                                                
             if (month < 13) {
-                //cout << "day: " << day << endl;
                 if (day < 1 || day > daysInEachMonth.at(month - 1)) {
                     isDateValid = false;
                     cout << "month " << month << ", does not contain " << day << " days" << endl;
@@ -1674,7 +1683,6 @@ void makeBooking(Customer user) {
         int driversAvailable = 0;
         for (int i = 0; i < availableTimes.size(); i++) {
             if (availableTimes[i][0] == userInputTime) {
-                //cout << "found " << endl;
                 for (int j = 0; j < availableTimes.at(i).size(); j++) {
                     if (availableTimes[i][j] == "available") {
                         availableDriverEmail = availableTimes[i][j - 1];
@@ -1822,6 +1830,9 @@ void makeBooking(Customer user) {
     // output to schedule/ ( DD-MM-YY ).csv with update availableTimes
     updateSchedule(availableTimes, filename);
     cout << "Booking successful" << endl;
+    cout << "Press enter to continue..." << endl;
+    string contin;
+    getline(cin, contin);
 }
 
 vector<Booking> readBookingsFile() {
@@ -1879,7 +1890,6 @@ vector<Booking> readBookingsFile() {
 
 void displayAllBookings(vector<Booking> bookings) {
     // displays al Bookings from a vector
-    //cout << "\nDisplay all bookings" << endl;
     for (auto b : bookings) {
         cout << b.bookingRef << ", " << b.customer.firstName << " " << b.customer.lastName << ", Driver: " << b.driver.firstName << endl;
         cout << b.date << ", " << b.time << ", " << b.duration << ", " << b.startLocation << ", " << b.endLocation << ", $" << b.cost << endl << endl; 
@@ -1887,6 +1897,7 @@ void displayAllBookings(vector<Booking> bookings) {
 }
 
 Driver getDriverByEmail(string email) {
+    // input a drivers email into this function and it returns the Driver as a struct
     Driver chosenDriver;
     vector<Driver> drivers = readDriversFile();
     //for loop, search for email match
@@ -1899,6 +1910,7 @@ Driver getDriverByEmail(string email) {
 }
 
 Customer getCustomerByEmail(string email) {
+    // input a customers email into this function and it returns the customer as a struct
     Customer customer;
     vector<Customer> customers = readCustomerFile();
     //for loop, search for email match
@@ -1911,6 +1923,7 @@ Customer getCustomerByEmail(string email) {
 }
 
 void updateBookingsFile(vector<Booking> bookings) {
+    //updats bookings.csv with the latest information
     for (int i = 0; i < bookings.size(); i++) {
         bookings.at(i).startLocation.erase(remove(bookings.at(i).startLocation.begin(), bookings.at(i).startLocation.end(), ','), bookings.at(i).startLocation.end());
         bookings.at(i).endLocation.erase(remove(bookings.at(i).endLocation.begin(), bookings.at(i).endLocation.end(), ','), bookings.at(i).endLocation.end());
@@ -1928,7 +1941,7 @@ void updateBookingsFile(vector<Booking> bookings) {
 }
 
 void updateSchedule(vector<vector<string>> availableTimes, string filename) {
-
+    //updates driver schedule by given date // string filename is date "schedule/DD-MM-YY.csv" 
     fstream scheduleFile;
     scheduleFile.open(filename, ios::out);
     if (scheduleFile.is_open()) {
@@ -1975,7 +1988,6 @@ void createNewSchedule(string filename) {
         //loop through list of drivers for given time, input the driver email followed by the drivers availability
         string availability = "temp";
         for (int d = 0; d < drivers.size(); d++) {
-            //availability = to_string(drivers.at(d).driverFinish); //code possibly rubbish
             availability = getDriverAvailabilityByTime(drivers.at(d), time); // get driver availability for a given time
             newSchedule.at(i).push_back(drivers.at(d).email); // pushing drivers email to vector
             newSchedule.at(i).push_back(availability);  // pushing drivers availabilty to vector
@@ -1987,13 +1999,14 @@ void createNewSchedule(string filename) {
 }
 
 string getDriverAvailabilityByTime(Driver driver, string time) {
+    // enter Driver and a given time of day, this function will return "available" or "unstaffed if the driver is working at that given time
     string availability = "available";
+    // vector of half hour blocks in a 48hr time period
     vector<float> availableTimes = { 0.0,0.3,1.0,1.3,2.0,2.3,3.0,3.3,4.0,4.3,5.0,5.3,6.0,6.3,7.0,7.3,8.0,8.3,9.0,9.3,
         10.0,10.3,11.0,11.3,12.0,12.3,13.0,13.3,14.0,14.3,15.0,15.3,16.0,16.3,17.0,17.3,18.0,18.3,19.0,19.3,20.0,20.3,21.0,21.3,22.0,22.3,23.0,23.3,0.0,0.3,1.0,1.3,2.0,2.3,3.0,3.3,4.0,4.3,5.0,5.3,6.0,6.3,7.0,7.3,8.0,8.3,9.0,9.3,
         10.0,10.3,11.0,11.3,12.0,12.3,13.0,13.3,14.0,14.3,15.0,15.3,16.0,16.3,17.0,17.3,18.0,18.3,19.0,19.3,20.0,20.3,21.0,21.3,22.0,22.3,23.0,23.3 };
 
-
-        //find driver start, cut every thing before it
+    //find driver start, cut every thing before it
     int removeEverythingBefore = 0;
     for (int i = 0; i < availableTimes.size(); i++) {
         if (availableTimes.at(i) == driver.driverStart) {
@@ -2011,7 +2024,7 @@ string getDriverAvailabilityByTime(Driver driver, string time) {
     }
     availableTimes.erase(availableTimes.begin() + removeEverythingAfter, availableTimes.end());
 
-// covert string time to float
+    // covert string time to float
     float convertedTime;
     stringstream ssTime(time);
     ssTime >> convertedTime;
@@ -2031,7 +2044,8 @@ string getDriverAvailabilityByTime(Driver driver, string time) {
 }
 
 void bookingOverflow(string driverEmail, string date, float halfHourBlocksOverflow, string bookingRef) {
-    //checkforfile, ?makefile  // readSchedule //replace availability for a driver for time 0.00 and following halfHourBlocks depending on halfHourBlocksOverflow
+    // if a booking extends past midnight this function is called to update a schedule for the following day
+    
     string followingDate = "";
     followingDate = incrementDate(date);
     
@@ -2039,14 +2053,13 @@ void bookingOverflow(string driverEmail, string date, float halfHourBlocksOverfl
     string directory = "schedule/";
     string extension = ".csv";
 
-
     //string filename = "schedule/14-06-22.csv";
     string filename = directory + followingDate + extension;
     checkForSchedule(filename);
     //change schedule
     vector<vector<string>> schedule = readSchedule(filename);
 
-    //============================================================= updateNewDrivers
+    // updateNewDrivers
     schedule = addNewDriversToSchedule(schedule);
 
     //from time 0
@@ -2115,6 +2128,7 @@ string incrementDate(string date) {
 }
 
 void checkForSchedule(string filename) {
+    // this function checks for a driver schedule by a given filename, if no such schedule is found, createNewSchedule(givenFilename) is called
     fstream checkForScheduleFile;
     string checkLine;
     checkForScheduleFile.open(filename, ios::in);
@@ -2135,6 +2149,7 @@ void checkForSchedule(string filename) {
 }
 
 vector<vector<string>> readSchedule(string filename) {
+    // reads driver schedule for a given date and returns vector of vector<string>
     vector<vector<string>> schedule = {
         {},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},
     };
@@ -2166,6 +2181,7 @@ vector<vector<string>> readSchedule(string filename) {
 }
 
 vector<vector<string>> addNewDriversToSchedule(vector<vector<string>> schedule) {
+    // this function updates a schedule if a new driver login has been created after the schedule was made
     vector<Driver> drivers = readDriversFile();
 
     int cellsToBeUpdated = 0; // amount of cells at end of each row that need updating
@@ -2200,7 +2216,8 @@ vector<vector<string>> addNewDriversToSchedule(vector<vector<string>> schedule) 
 }
 
 bool hasDatePassed(string date) {
-    //cout << "========================================\n\thasDatePassed function called...\n" << endl;
+    //this function compares date entered with todays date and returns 'true' if the date entered has passed
+
     bool dateHasPassed = false;
     // date =  "DD/MM/YY"
     int day = 0;
@@ -2217,19 +2234,10 @@ bool hasDatePassed(string date) {
     stringstream ssYear(sYear);
     ssYear >> year;
 
-    //cout << "date entered: " << day << "-" << month << "-" << year << endl;
-
     // get todays date
     struct tm newtime;
     time_t now = time(0);
     localtime_s(&newtime, &now);
-
-    // convert todays date
-    //cout << "Todays date: " << endl;
-    ////cout << "now: " << now << endl;
-    //cout << "day: " << newtime.tm_mday << endl;
-    //cout << "Month: " << 1 + newtime.tm_mon << endl;
-    //cout << "year: " << ( -100) + newtime.tm_year << endl;
 
     // compare year 
     if (year < ((-100) + newtime.tm_year)) {
@@ -2246,11 +2254,11 @@ bool hasDatePassed(string date) {
         dateHasPassed = true;
     }
 
-    //cout << "\n\thasDatePassed function ended...\n========================================" << endl;
     return dateHasPassed;
 }
 
 bool isDateWithinTimeFrame(string date, int timeFrame) {
+    // checks if date entered is within timefram // int timeframe is the number of days from now a user can make a booking until
     bool withinTimeFrame = true;
     // date entered =  "DD/MM/YY"
     // convert date entered to integers
@@ -2269,17 +2277,11 @@ bool isDateWithinTimeFrame(string date, int timeFrame) {
     ssYear >> year;
 
     // get todays date
-
-    
-    
-    //cout << "Today: " << todaysDate << endl;
-
     // use incrementDate function in a loop?
     string cutOffDate = getTodaysDateAsString();
     for (int i = 0; i < timeFrame; i++) {
         cutOffDate = incrementDate(cutOffDate);
     }
-    //cout << "cut off date = " << cutOffDate << endl;
 
     // ensure that date entered into function is less than the cut off date
     int cutOffDay = 0;
@@ -2314,13 +2316,13 @@ bool isDateWithinTimeFrame(string date, int timeFrame) {
     if (day > cutOffDay && year == cutOffYear && month == cutOffMonth) {
         withinTimeFrame = false;
         //cout << "cut off day exceeded. cutOffDay: " << cutOffDay << endl;
-
     }
 
     return withinTimeFrame;
 }
 
 void displayThisCustomersTransactions(Customer user) {
+    // displays all transactions for a given customer and prompts them to cancel any if aplicable
     vector<Booking> bookings = readBookingsFile();
     vector<Booking> userBookingsPast;
     vector<Booking> userBookingsFuture;
@@ -2458,7 +2460,6 @@ void displayThisCustomersTransactions(Customer user) {
     }
     updateSchedule(schedule, filename);
     cout << "Booking cancelled" << endl;
-
 }
 
 void displayAllTransactions() {
@@ -2640,7 +2641,7 @@ void makeComplaintOrEnquiry(string enquiryType) {
 }
 
 vector<complaintOrEnquiry> readEnquiriesFile() {
-    //this function will read admin.csv and return vector
+    //this function will read enquiries.csv and return vector
     vector<complaintOrEnquiry> enquiries;
     fstream enquiriesFile;
     complaintOrEnquiry tempEnquiry;
@@ -2682,7 +2683,7 @@ void updateEnquiriesFile(vector<complaintOrEnquiry> enquiries) {
 }
 
 void displayEnquiries(vector<complaintOrEnquiry> enquiries) {
-
+    // displays all enquiries
     cout << endl;
     for (auto e : enquiries) {
         cout << e.enquiryType << endl;
@@ -2741,6 +2742,7 @@ void displayEnquiries(vector<complaintOrEnquiry> enquiries) {
 }
 
 void DisplayThisDriversTransactions(Driver user) {
+    // display all transactions for a given taxi driver
     pageBreak();
     vector<Booking> bookings = readBookingsFile();
     vector<Booking> userBookingsPast;
@@ -2788,26 +2790,13 @@ void DisplayThisDriversTransactions(Driver user) {
 }
 
 void displayThisDriversScheduleToday(Driver user) {
+    // displays a drivers schedule for today
     // get todays date
     string date = getTodaysDateAsString();
-
-    // convert todays date
-    //cout << "Todays date: " << endl;
-    ////cout << "now: " << now << endl;
-    //cout << "day: " << newtime.tm_mday << endl;
-    //cout << "Month: " << 1 + newtime.tm_mon << endl;
-    //cout << "year: " << ( -100) + newtime.tm_year << endl;
 
     // check if there is a chedule for todays date
     replace(date.begin(), date.end(), '/', '-');
 
-    //cout << "Today: " << date << endl;
-    
-
-
-
-    // converting date format ( DD/MM/YY ) to a schedule filename ( schedule/ DD-MM-YY.csv )
-    
     vector <vector <string>> schedule = {
         {},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},
     };
@@ -2882,6 +2871,7 @@ void displayThisDriversScheduleToday(Driver user) {
 }
 
 string getTodaysDateAsString() {
+    //function returns a string of todays date
     struct tm newtime;
     time_t now = time(0);
     localtime_s(&newtime, &now);
@@ -2907,6 +2897,7 @@ string getTodaysDateAsString() {
 }
 
 Customer chooseCustomer(vector<Customer> customers) {
+    //promt admin to select customer
     Customer ChosenCustomer;
 
     cout << "All customers" << endl;
@@ -2936,6 +2927,7 @@ Customer chooseCustomer(vector<Customer> customers) {
 }
 
 Admin chooseAdmin(vector<Admin> admin) {
+    //prompt to select admin
     Admin chosenAdmin;
 
     cout << "All admin" << endl;
@@ -2964,8 +2956,8 @@ Admin chooseAdmin(vector<Admin> admin) {
     return chosenAdmin;
 }
 
-
 Driver chooseDriver(vector<Driver> drivers) {
+    //prompt to select driver
     Driver ChosenDriver;
 
     cout << "All drivers" << endl;
@@ -2995,20 +2987,8 @@ Driver chooseDriver(vector<Driver> drivers) {
 }
 
 void displayFullSchedule(string date) {
-    // convert todays date
-   //cout << "Todays date: " << endl;
-   ////cout << "now: " << now << endl;
-   //cout << "day: " << newtime.tm_mday << endl;
-   //cout << "Month: " << 1 + newtime.tm_mon << endl;
-   //cout << "year: " << ( -100) + newtime.tm_year << endl;
-
-   // check if there is a chedule for todays date
+    //display all drivers schedule for a given date
     replace(date.begin(), date.end(), '/', '-');
-
-    //cout << "Today: " << date << endl;
-
-
-
 
     // converting date format ( DD/MM/YY ) to a schedule filename ( schedule/ DD-MM-YY.csv )
 
@@ -3031,11 +3011,7 @@ void displayFullSchedule(string date) {
     // update availableTimes vector with any new drivers have been added
     schedule = addNewDriversToSchedule(schedule);
 
-
-
-
     // use ref number (personalDriverSchedule.at(i).at(1)) to find Booking and Customer, 
-
 
     // display personalDriverSchedule
     pageBreak();
@@ -3112,7 +3088,7 @@ string promtForDate() {
                 isDateValid = false;
                 cout << "Invalid month" << endl;
             }
-            // Day cannot be over 28,30,31 depending on month                                                //======= test this more ==========
+            // Day cannot be over 28,30,31 depending on month                                            
             if (month < 13) {
                 //cout << "day: " << day << endl;
                 if (day < 1 || day > daysInEachMonth.at(month - 1)) {
@@ -3128,7 +3104,5 @@ string promtForDate() {
 
     } while (isDateValid == false);
 
-
     return userInputDate;
-    
 }
