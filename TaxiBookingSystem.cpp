@@ -932,7 +932,7 @@ void adminMenu(Admin user) {
 
 
         //viewAllUsers
-        cout << "\n1. View all customers" << endl;
+        cout << "\n1.  View all customers" << endl;
         cout << "2.  Add customers" << endl;
         cout << "3.  Edit customers details" << endl;
         cout << "4.  View all Drivers" << endl;
