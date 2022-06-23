@@ -184,10 +184,6 @@ Driver chooseDriver(vector<Driver> drivers);
 void displayFullSchedule(string date);
 string promtForDate();
 
-
-// to do:      input.erase(remove(input.begin(), input.end(), ','), input.end());
-
-
 int main() //start menu
 {
     pageBreak();
@@ -292,7 +288,7 @@ void registerNewDriver() {
 
     //read drivers.csv and put in vector
     vector<Driver> driversList = readDriversFile();
-    displayAllDrivers(driversList);
+   // displayAllDrivers(driversList);
     //cout << "Start: " << driversList.at(1).driverStart << " Finish: " << driversList.at(1).driverFinish << endl;
     //add new driver to driversList
     Driver newDriver;
