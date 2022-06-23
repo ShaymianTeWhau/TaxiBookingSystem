@@ -1,31 +1,37 @@
-Run the program if you like, you can register as a new user and login.
-Or if you want to login as an existing user (customer, driver or admin), 
-just check the .csv files for an existing username (username is email address) and password.
+TAXI SERVICES WELLINGTON
+=========================================================================================================================================================
 
-At the moment the program will just display what type of user you are, until submenu's are made.
+=login system=
 
-
-
-
-==================================================================================================================
-
-This login system has 3 users.
+This login system has 3 types of users.
 - Customer
 - Driver
 - Admin
-There are seperate .csv files for each.
+All 3 users login in at the same place but the program will figure out 
+which type of user you are depending on which .csv file it found the user in. 
 
-void login();
-All 3 users login in the same place but the program will figure out 
-which type of user you are depending on which .csv file it found the user in.
-We can easily change this to seperate portals if you like.
- 
-At the end of the login() function there is a switch statement with functions i have commented out.
-They would go to different sub menus deppending on what kind of user you are. 
-We could pass in their name maybe?
+There are seperate .csv files containing information for each user, including their respective passwords ( "customers.csv", "drivers.csv", "admin.csv" ).
 
-readCustomersFile(), readDriversFile(), readAdminsFile() are all functions that read .csv files and return a vector.
-However I couldn't figure out how to condense these to one function. 
+If you would like to log in as a customer you could simply register a new login, and then login with the user you just created.
+Alternatively if you want to log in as an existing customer, driver or admin, you can check the respective .csv files for a username(email) and password,
+or use one of the examples below.
 
-The same goes for displayAllCostomers(vector<Customer>customerList), 
-displayAllDrivers(vector<Driver>driversList), displayAllAdmin(vector<Admin>adminList).
+example customer login:
+- username: lisasimpson@gmail.com 
+- password: saxophone
+
+example driver login:
+- username: driver2@gmail.com
+- password: password
+
+example admin login:
+- username: admin@gmail.com
+- password: admin123
+
+
+=Bookings=
+
+When bookings are created, Bookings are kept on the file, bookings.csv and are also shown on the driver schedule.
+
+Driver schedules are in the folder "schedule/" , and are named by the date ( DD-MM-YY ). 
+The application creates a driver schedule whenever a new booking is made, or whenever a specific day needs to be viewed.
