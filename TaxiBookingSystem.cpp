@@ -3049,7 +3049,6 @@ string promtForDate() {
         // promt user
         cout << "Type a date to see availability (DD/MM/YY): ";
         getline(cin, userInputDate);
-        //if (userInputDate == "E" || userInputDate == "e") return "void";
 
         // validate length
         if (userInputDate.length() == 8) {
@@ -3083,14 +3082,12 @@ string promtForDate() {
                 ssDay >> day;
             }
             // month cannot be over 12
-            // cout << "month: " << month << endl;
             if (month < 1 || month > 12) {
                 isDateValid = false;
                 cout << "Invalid month" << endl;
             }
             // Day cannot be over 28,30,31 depending on month                                            
             if (month < 13) {
-                //cout << "day: " << day << endl;
                 if (day < 1 || day > daysInEachMonth.at(month - 1)) {
                     isDateValid = false;
                     cout << "month " << month << ", does not contain " << day << " days" << endl;
